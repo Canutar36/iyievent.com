@@ -1,0 +1,299 @@
+/* iyi event - Luxury Brand Design System */
+
+:root {
+  /* Renk Paleti (iyi event Logo & Renk paletinden esinlenilmiştir) */
+  --color-cream: #F6F3EA;        /* Ana Krem Arka Plan */
+  --color-cream-light: #FAF8F3;  /* Açık Krem (Kartlar vb.) */
+  --color-cream-dark: #EBE7DA;   /* Koyu Krem (Kenarlıklar, gölgeler) */
+  
+  --color-slate: #2A3538;        /* Marka Koyu Füme (Yazılar, ana başlıklar) */
+  --color-slate-medium: #3A474B; /* Orta Füme */
+  --color-slate-dark: #1E2729;   /* Koyu Füme Arka Plan (Kontrast alanlar) */
+  --color-slate-deep: #141A1B;   /* En Koyu Füme (Preloader, footer, derinlik) */
+  
+  --color-orange: #F05A28;       /* Hermes Esintili Canlı Vurgu Turuncu */
+  --color-orange-dark: #D44315;  /* Koyu Turuncu (Hover durumları) */
+  --color-orange-light: rgba(240, 90, 40, 0.1);
+  --color-orange-glow: rgba(240, 90, 40, 0.25);
+
+  --color-white: #FFFFFF;
+  --color-black: #000000;
+  
+  /* Tipografi */
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Syne', sans-serif;
+
+  /* Geçişler ve Efektler */
+  --transition-smooth: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-fast: all 0.25s ease;
+  --glass-shadow: 0 8px 32px 0 rgba(42, 53, 56, 0.08);
+  --card-shadow: 0 15px 45px rgba(42, 53, 56, 0.05);
+}
+
+/* Temel Sıfırlamalar ve Yapı */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-cream);
+  color: var(--color-slate);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* Özelleştirilmiş Zarif Kaydırma Çubuğu (Scrollbar) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-cream);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-slate-medium);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-orange);
+}
+
+/* Seçim Rengi */
+::selection {
+  background-color: var(--color-orange);
+  color: var(--color-white);
+}
+
+/* Başlıklar ve Yazı Tipleri */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  color: var(--color-slate);
+  line-height: 1.2;
+}
+
+p {
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  font-weight: 300;
+  letter-spacing: -0.01em;
+  color: var(--color-slate-medium);
+}
+
+/* Genel Konteyner */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 4rem;
+}
+
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1.5rem;
+  }
+}
+
+/* Premium Buton Tasarımları */
+.btn-primary {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-white);
+  background-color: var(--color-slate);
+  border: 1px solid var(--color-slate);
+  padding: 1.1rem 2.2rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  transition: var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-orange);
+  transform: translateY(101%);
+  transition: var(--transition-smooth);
+  z-index: -1;
+}
+
+.btn-primary:hover {
+  color: var(--color-white);
+  border-color: var(--color-orange);
+  box-shadow: 0 8px 24px var(--color-orange-glow);
+}
+
+.btn-primary:hover::before {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-slate);
+  background: transparent;
+  border: 1px solid var(--color-slate);
+  padding: 1.1rem 2.2rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  transition: var(--transition-smooth);
+}
+
+.btn-secondary:hover {
+  color: var(--color-orange);
+  border-color: var(--color-orange);
+  padding-left: 2.6rem;
+  padding-right: 1.8rem;
+}
+
+/* Glassmorphism Menü */
+.glass-header {
+  background: rgba(246, 243, 234, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(42, 53, 56, 0.06);
+}
+
+/* Dark Mode Geçişli Arka Plan Sınıfları */
+.bg-dark {
+  background-color: var(--color-slate-dark);
+  color: var(--color-cream);
+}
+
+.bg-dark h1, .bg-dark h2, .bg-dark h3, .bg-dark h4 {
+  color: var(--color-cream);
+}
+
+.bg-dark p {
+  color: var(--color-cream-dark);
+}
+
+.bg-dark .btn-secondary {
+  color: var(--color-cream);
+  border-color: var(--color-cream);
+}
+
+.bg-dark .btn-secondary:hover {
+  color: var(--color-orange);
+  border-color: var(--color-orange);
+}
+
+/* Lüks Efektler & Mikro Animasyonlar */
+.text-reveal {
+  position: relative;
+  overflow: hidden;
+}
+
+.reveal-in {
+  animation: revealUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes revealUp {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.glow-logo {
+  animation: logoGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes logoGlow {
+  0% {
+    filter: drop-shadow(0 0 2px rgba(240, 90, 40, 0.1));
+  }
+  100% {
+    filter: drop-shadow(0 0 15px rgba(240, 90, 40, 0.6));
+  }
+}
+
+/* Responsive Grid Sistem */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4rem;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3rem;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-2, .grid-3, .grid-4 {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+}
+
+/* Section Bölmeleri */
+section {
+  padding: 8rem 0;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  section {
+    padding: 5rem 0;
+  }
+}
