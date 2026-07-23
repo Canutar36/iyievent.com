@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import { isDevPreview } from '@/lib/config'
-import { isPersonel } from '@/lib/roles'
+import { isPersonel, isSuperAdmin, yetki, yoldanModul } from '@/lib/roles'
 
 /**
  * Next.js 16 Proxy (eski adıyla Middleware).
@@ -125,7 +125,7 @@ export async function proxy(request) {
     return NextResponse.redirect(dest)
   }
 
-  // Yönetim yetkisi — sadece personel rolleri (satis/operasyon/muhasebe/yonetici)
+  // Yönetim yetkisi — personel rolleri + rol bazlı sayfa erişimi
   if (path.startsWith('/yonetim') && user) {
     const { data: profile } = await supabase
       .from('profiles')
@@ -133,9 +133,19 @@ export async function proxy(request) {
       .eq('id', user.id)
       .single()
 
+    // Personel değilse yönetime giremez
     if (!profile || !isPersonel(profile.role)) {
       const dest = request.nextUrl.clone()
       dest.pathname = '/musteri/etkinlikler'
+      return NextResponse.redirect(dest)
+    }
+
+    // Rol bazlı sayfa erişimi (Ayarlar yalnızca sistem sahibine)
+    const modul = yoldanModul(path)
+    const izin = modul === 'ayarlar' ? isSuperAdmin(user.email) : yetki(profile.role, modul)
+    if (!izin) {
+      const dest = request.nextUrl.clone()
+      dest.pathname = '/yonetim' // yetkisiz modül → kokpite geri al
       return NextResponse.redirect(dest)
     }
   }

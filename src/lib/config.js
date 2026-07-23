@@ -17,10 +17,10 @@ export function isDevPreview() {
   return process.env.NODE_ENV !== 'production' && !isSupabaseConfigured()
 }
 
-/** Dev önizlemede kullanılan sahte yönetici profili. */
+/** Dev önizlemede kullanılan sahte yönetici profili (süper-admin). */
 export const DEMO_ADMIN = {
   id: 'demo-admin',
-  email: 'yonetim@iyievent.com',
+  email: 'bilgi@iyievent.com',
   full_name: 'Demo Yönetici',
   role: 'yonetici',
 }

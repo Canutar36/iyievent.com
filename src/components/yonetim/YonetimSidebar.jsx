@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Monogram } from '@/components/Logo'
+import { yetki, isSuperAdmin, yoldanModul } from '@/lib/roles'
 
 // Modül grupları — şirketin uçtan uca operasyonu tek panelde.
 // hazir=false olanlar "yakında" placeholder sayfa gösterir.
@@ -69,6 +70,19 @@ export default function YonetimSidebar({ profile }) {
   const pathname = usePathname()
   const { signOut } = useAuth()
 
+  // Rol bazlı modül filtresi + Ayarlar yalnızca sistem sahibine
+  const rol = profile?.role
+  const superAdmin = isSuperAdmin(profile?.email)
+  const gruplar = navGroups
+    .map(g => ({
+      ...g,
+      items: g.items.filter(item => {
+        if (item.href === '/yonetim/ayarlar') return superAdmin
+        return yetki(rol, yoldanModul(item.href))
+      }),
+    }))
+    .filter(g => g.items.length > 0)
+
   return (
     <aside style={{
       position: 'fixed', left: 0, top: 0, bottom: 0,
@@ -111,7 +125,7 @@ export default function YonetimSidebar({ profile }) {
 
       {/* Navigasyon */}
       <nav style={{ flex: 1, padding: '1rem 0' }}>
-        {navGroups.map((group, gi) => (
+        {gruplar.map((group, gi) => (
           <div key={gi} style={{ marginBottom: '0.8rem' }}>
             {group.baslik && (
               <div style={{

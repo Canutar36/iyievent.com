@@ -6,11 +6,9 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Logo } from '@/components/Logo'
 
 function LoginForm() {
-  const [mod, setMod] = useState('giris') // 'giris' | 'kayit' | 'sifre_sifirla'
+  const [mod, setMod] = useState('giris') // 'giris' | 'sifre_sifirla'
   const [email, setEmail] = useState('')
   const [sifre, setSifre] = useState('')
-  const [adSoyad, setAdSoyad] = useState('')
-  const [telefon, setTelefon] = useState('')
   const [loading, setLoading] = useState(false)
   const [hata, setHata] = useState('')
   const [basari, setBasari] = useState('')
@@ -18,7 +16,7 @@ function LoginForm() {
   const supabase = createClient()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get('redirect') || '/musteri/etkinlikler'
+  const redirect = searchParams.get('redirect') || '/yonetim'
 
   const handleGiris = async (e) => {
     e.preventDefault()
@@ -37,35 +35,13 @@ function LoginForm() {
     setLoading(false)
   }
 
-  const handleKayit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setHata('')
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password: sifre,
-      options: {
-        data: { full_name: adSoyad, phone: telefon },
-        emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/musteri/etkinlikler`,
-      },
-    })
-
-    if (error) {
-      setHata(error.message)
-    } else {
-      setBasari('Kayıt başarılı! E-posta adresinize bir doğrulama linki gönderdik.')
-    }
-    setLoading(false)
-  }
-
   const handleSifreSifirla = async (e) => {
     e.preventDefault()
     setLoading(true)
     setHata('')
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/api/auth/callback?next=/musteri/etkinlikler`,
+      redirectTo: `${window.location.origin}/api/auth/callback?next=/yonetim`,
     })
 
     if (error) {
@@ -105,24 +81,21 @@ function LoginForm() {
         border: '1px solid var(--color-cream-dark)',
         boxShadow: '0 8px 40px rgba(42,53,56,0.06)',
       }}>
-        {/* Tabs */}
-        <div style={{ display: 'flex', marginBottom: '2.5rem', borderBottom: '1px solid var(--color-cream-dark)' }}>
-          {[
-            { key: 'giris', label: 'Giriş Yap' },
-            { key: 'kayit', label: 'Kayıt Ol' },
-          ].map(tab => (
-            <button key={tab.key} type="button" onClick={() => { setMod(tab.key); setHata(''); setBasari('') }} style={{
-              flex: 1, padding: '0.8rem', background: 'none', border: 'none', cursor: 'pointer',
-              fontFamily: 'var(--font-display)', fontSize: '0.8rem', fontWeight: 700,
-              letterSpacing: '0.1em', textTransform: 'uppercase',
-              color: mod === tab.key ? 'var(--color-orange)' : 'var(--color-slate-medium)',
-              borderBottom: mod === tab.key ? '2px solid var(--color-orange)' : '2px solid transparent',
-              marginBottom: '-1px',
-              transition: 'all 0.25s ease',
-            }}>
-              {tab.label}
-            </button>
-          ))}
+        {/* Başlık */}
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <div style={{
+            fontFamily: 'var(--font-display)', fontSize: '0.7rem', fontWeight: 700,
+            letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--color-orange)',
+            marginBottom: '0.5rem',
+          }}>
+            {mod === 'giris' ? 'Yönetim Girişi' : 'Şifre Sıfırlama'}
+          </div>
+          <h1 style={{
+            fontFamily: 'var(--font-serif)', fontSize: '1.6rem', fontWeight: 400,
+            color: 'var(--color-slate)', margin: 0,
+          }}>
+            {mod === 'giris' ? 'Hesabınıza Giriş Yapın' : 'Şifrenizi Sıfırlayın'}
+          </h1>
         </div>
 
         {/* Hata / Başarı mesajları */}
@@ -176,43 +149,6 @@ function LoginForm() {
               onMouseLeave={e => e.target.style.color = 'var(--color-slate-medium)'}
             >
               Şifremi unuttum
-            </button>
-          </form>
-        )}
-
-        {/* Kayıt Formu */}
-        {mod === 'kayit' && (
-          <form onSubmit={handleKayit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <input type="text" required placeholder="Ad Soyad"
-              value={adSoyad} onChange={e => setAdSoyad(e.target.value)}
-              style={inputStyle}
-              onFocus={e => e.target.style.borderColor = 'var(--color-orange)'}
-              onBlur={e => e.target.style.borderColor = 'var(--color-cream-dark)'}
-            />
-            <input type="tel" placeholder="Telefon (opsiyonel)"
-              value={telefon} onChange={e => setTelefon(e.target.value)}
-              style={inputStyle}
-              onFocus={e => e.target.style.borderColor = 'var(--color-orange)'}
-              onBlur={e => e.target.style.borderColor = 'var(--color-cream-dark)'}
-            />
-            <input type="email" required placeholder="E-posta adresi"
-              value={email} onChange={e => setEmail(e.target.value)}
-              style={inputStyle}
-              onFocus={e => e.target.style.borderColor = 'var(--color-orange)'}
-              onBlur={e => e.target.style.borderColor = 'var(--color-cream-dark)'}
-            />
-            <input type="password" required placeholder="Şifre (min. 8 karakter)" minLength={8}
-              value={sifre} onChange={e => setSifre(e.target.value)}
-              style={inputStyle}
-              onFocus={e => e.target.style.borderColor = 'var(--color-orange)'}
-              onBlur={e => e.target.style.borderColor = 'var(--color-cream-dark)'}
-            />
-            <button type="submit" className="btn-primary" disabled={loading} style={{
-              width: '100%', justifyContent: 'center', marginTop: '0.5rem',
-              opacity: loading ? 0.7 : 1,
-            }}>
-              {loading ? 'Kayıt olunuyor...' : 'Kayıt Ol'}
-              {!loading && <i className="fas fa-arrow-right" style={{ fontSize: '0.75rem' }} />}
             </button>
           </form>
         )}

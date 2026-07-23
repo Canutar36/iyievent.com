@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase-server'
 import { isDevPreview } from '@/lib/config'
-import { isPersonel, normalizeRol } from '@/lib/roles'
+import { isPersonel, normalizeRol, isSuperAdmin } from '@/lib/roles'
 
 /**
  * Server action / route handler için rol koruması.
@@ -24,4 +24,21 @@ export async function rolGuard(roller = []) {
     return { ok: false, error: 'Bu işlem için yetkiniz yok.' }
   }
   return { ok: true, rol }
+}
+
+/**
+ * Yalnızca SİSTEM SAHİBİNE (süper-admin — bilgi@iyievent.com) açık işlemler
+ * için koruma. Kullanıcı/rol yönetimi bunu kullanır.
+ * Dev önizlemede süper-admin olarak geçer.
+ */
+export async function superAdminGuard() {
+  if (isDevPreview()) return { ok: true, superAdmin: true }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Oturum bulunamadı.' }
+  if (!isSuperAdmin(user.email)) {
+    return { ok: false, error: 'Bu işlem yalnızca sistem sahibine açıktır.' }
+  }
+  return { ok: true, superAdmin: true, email: user.email }
 }

@@ -1,5 +1,7 @@
-import { createServiceClient } from '@/lib/supabase-server'
+import { createClient, createServiceClient } from '@/lib/supabase-server'
 import { isDevPreview } from '@/lib/config'
+import { isSuperAdmin } from '@/lib/roles'
+import { redirect } from 'next/navigation'
 import AyarlarClient from './AyarlarClient'
 
 export const metadata = { title: 'Ayarlar | Yönetim' }
@@ -33,6 +35,12 @@ async function getData() {
 }
 
 export default async function AyarlarPage() {
+  // Ayarlar YALNIZCA sistem sahibine (süper-admin) açıktır.
+  if (!isDevPreview()) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user || !isSuperAdmin(user.email)) redirect('/yonetim')
+  }
   const { ekip, aktivite } = await getData()
   return <AyarlarClient ekip={ekip} aktivite={aktivite} demo={isDevPreview()} />
 }
