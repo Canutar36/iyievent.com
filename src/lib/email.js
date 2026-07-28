@@ -18,13 +18,14 @@ const MARKA = {
 }
 
 function epostaKabuk(icBaslik, govde) {
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://iyievent-com.vercel.app'
   return `
   <!DOCTYPE html>
   <html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
   <body style="margin:0;padding:0;background:${MARKA.cream};font-family:Georgia,'Times New Roman',serif;">
     <div style="max-width:620px;margin:0 auto;background:#FFFFFF;">
       <div style="background:${MARKA.slate};padding:2.6rem 2.5rem;text-align:center;">
-        <p style="font-family:Arial,sans-serif;font-size:0.68rem;letter-spacing:0.35em;text-transform:uppercase;color:${MARKA.orange};margin:0 0 0.5rem;">iyi event</p>
+        <img src="${APP_URL}/assets/email/logo.png" alt="iyi event" width="160" style="display:block;margin:0 auto 1rem;width:160px;max-width:60%;height:auto;" />
         <h1 style="font-family:Georgia,serif;font-weight:300;font-size:1.9rem;color:${MARKA.cream};margin:0;line-height:1.3;">${icBaslik}</h1>
       </div>
       <div style="padding:2.8rem 2.5rem;">${govde}</div>
