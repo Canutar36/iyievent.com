@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase-client'
 
 // Dev/demo veriler — gerçek backend bağlanınca sunucudan gelecek
 const DEMO_TODO = [
@@ -13,10 +14,6 @@ const DEMO_TODO = [
 const DEMO_RANDEVU = [
   { id: 'r1', baslik: 'Melis Sabancı — yüz yüze görüşme', saat: '14:00', yer: 'Nişantaşı Ofis' },
   { id: 'r2', baslik: 'Arda Holding — teklif sunumu', saat: '16:30', yer: 'Online' },
-]
-const DEMO_BILDIRIM = [
-  { id: 'b1', baslik: 'Yeni talep: Deniz Yılmaz', tur: 'bilgi' },
-  { id: 'b2', baslik: 'Ödeme alındı: Midnight Aegean 300.000₺', tur: 'odeme' },
 ]
 
 function Popover({ acik, onKapat, children, genislik = 320 }) {
@@ -71,12 +68,47 @@ export default function YonetimTopbar({ profile }) {
   const [acik, setAcik] = useState(null) // 'todo' | 'takvim' | 'bildirim' | null
   const router = useRouter()
   const [arama, setArama] = useState('')
+  const [bildirimler, setBildirimler] = useState([])
+  const supabase = createClient()
 
   const rolEtiket = {
     yonetici: 'Yönetici', satis: 'Satış', operasyon: 'Operasyon', muhasebe: 'Muhasebe', admin: 'Yönetici',
   }[profile?.role] || 'Personel'
 
-  function toggle(k) { setAcik(a => a === k ? null : k) }
+  function toggle(k) {
+    if (acik === k) {
+      setAcik(null)
+    } else {
+      setAcik(k)
+      if (k === 'bildirim') bildirimleriOkunduIsaretle()
+    }
+  }
+
+  useEffect(() => {
+    bildirimleriYukle()
+    const interval = setInterval(bildirimleriYukle, 30000)
+    return () => clearInterval(interval)
+  }, [])
+
+  async function bildirimleriYukle() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { data } = await supabase
+      .from('bildirimler')
+      .select('*')
+      .eq('kullanici_id', user.id)
+      .eq('okundu', false)
+      .order('created_at', { ascending: false })
+      .limit(20)
+    setBildirimler(data || [])
+  }
+
+  async function bildirimleriOkunduIsaretle() {
+    if (!bildirimler.length) return
+    const ids = bildirimler.map(b => b.id)
+    await supabase.from('bildirimler').update({ okundu: true }).in('id', ids)
+    setBildirimler([])
+  }
 
   function aramaSubmit(e) {
     e.preventDefault()
@@ -153,17 +185,29 @@ export default function YonetimTopbar({ profile }) {
 
       {/* Bildirimler */}
       <div style={{ position: 'relative' }}>
-        <IkonButon ikon="fas fa-bell" baslik="Bildirimler" aktif={acik === 'bildirim'} rozet={DEMO_BILDIRIM.length} onClick={() => toggle('bildirim')} />
+        <IkonButon ikon="fas fa-bell" baslik="Bildirimler" aktif={acik === 'bildirim'} rozet={bildirimler.length} onClick={() => toggle('bildirim')} />
         <Popover acik={acik === 'bildirim'} onKapat={() => setAcik(null)}>
           <PopBaslik>Bildirimler</PopBaslik>
           <div style={{ maxHeight: '340px', overflowY: 'auto' }}>
-            {DEMO_BILDIRIM.map(b => (
-              <div key={b.id} style={{ padding: '0.8rem 1.1rem', borderBottom: '1px solid var(--color-cream)', display: 'flex', gap: '0.7rem', alignItems: 'center' }}>
-                <div style={{ width: '30px', height: '30px', borderRadius: '8px', flexShrink: 0, background: 'var(--color-orange-light)', color: 'var(--color-orange)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem' }}>
-                  <i className={b.tur === 'odeme' ? 'fas fa-wallet' : 'fas fa-circle-info'} />
-                </div>
-                <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.82rem', color: 'var(--color-slate)' }}>{b.baslik}</div>
+            {bildirimler.length === 0 && (
+              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-slate-medium)', fontSize: '0.82rem' }}>
+                Yeni bildirim yok
               </div>
+            )}
+            {bildirimler.map(b => (
+              <Link key={b.id} href={b.link || '#'} onClick={() => setAcik(null)} style={{ textDecoration: 'none' }}>
+                <div style={{ padding: '0.8rem 1.1rem', borderBottom: '1px solid var(--color-cream)', display: 'flex', gap: '0.7rem', alignItems: 'center', cursor: 'pointer', transition: 'background 0.1s' }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#FAFAF9'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '8px', flexShrink: 0, background: 'var(--color-orange-light)', color: 'var(--color-orange)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem' }}>
+                    <i className={b.tur === 'odeme' ? 'fas fa-wallet' : b.tur === 'uyari' ? 'fas fa-triangle-exclamation' : 'fas fa-circle-info'} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.82rem', color: 'var(--color-slate)', fontWeight: 500 }}>{b.baslik}</div>
+                    {b.mesaj && <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.7rem', color: 'var(--color-slate-medium)', marginTop: '0.15rem' }}>{b.mesaj}</div>}
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         </Popover>
