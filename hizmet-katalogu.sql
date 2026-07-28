@@ -1,27 +1,4 @@
--- ============================================================
--- ADIM 1: RLS DÜZELTMESİ
--- Tüm authenticated kullanıcıların hizmet/ekstra okumasına izin ver
--- ============================================================
-
--- Daha önce eklendiyse hata vermesini önle
-DO $$ BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies WHERE policyname = 'Musteriler hizmetleri okuyabilir' AND tablename = 'hizmetler'
-  ) THEN
-    create policy "Musteriler hizmetleri okuyabilir"
-      on public.hizmetler for select to authenticated using (aktif = true);
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies WHERE policyname = 'Musteriler ekstralari okuyabilir' AND tablename = 'ekstralar'
-  ) THEN
-    create policy "Musteriler ekstralari okuyabilir"
-      on public.ekstralar for select to authenticated using (aktif = true);
-  END IF;
-END $$;
-
+-- RLS politikalari zaten mevcut, atlaniyor.
 
 -- ============================================================
 -- ADIM 2: ESKİ VERİLERİ TEMİZLE (isteğe bağlı, idempotent)
