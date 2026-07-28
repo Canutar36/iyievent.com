@@ -291,3 +291,65 @@ export async function sendKampanyaEmail({ emails = [], konu, baslik, icerik }) {
   }
   return { gonderilen }
 }
+
+// ============================================================
+// ETKİNLİK DURUM DEĞİŞİKLİĞİ MAİLLERİ
+// ============================================================
+
+const DURUM_SABLONLARI = {
+  planlama: {
+    baslik: 'Talebiniz Değerlendirmeye Alındı',
+    satir: 'Etkinlik talebiniz planlama sürecine alınmıştır.',
+    govde: 'Tarafımızdan detaylar için aranacaksınız, sonrasında onay sürecine geçeceğiz.',
+    ikon: 'fas fa-clipboard-list',
+  },
+  onaylandi: {
+    baslik: 'Etkinliğiniz Onaylandı',
+    satir: 'Etkinliğiniz onay sürecinden geçmiş ve kesinleşmiştir.',
+    govde: 'Tüm detaylar tarafınıza iletilecektir. Herhangi bir sorunuz olursa bizimle iletişime geçebilirsiniz.',
+    ikon: 'fas fa-check-circle',
+  },
+  tamamlandi: {
+    baslik: 'Etkinliğiniz Tamamlandı',
+    satir: 'Etkinliğiniz başarıyla tamamlanmıştır.',
+    govde: 'Bizi tercih ettiğiniz için çok teşekkür ederiz. Deneyiminizi bizimle paylaşmak isterseniz yanıtlayabilirsiniz.',
+    ikon: 'fas fa-trophy',
+  },
+  iptal: {
+    baslik: 'Etkinliğiniz İptal Edildi',
+    satir: 'Etkinlik talebiniz iptal edilmiştir.',
+    govde: 'Herhangi bir ödeme yapıldıysa iade süreci başlatılacaktır. Sorularınız için bizimle iletişime geçebilirsiniz.',
+    ikon: 'fas fa-xmark-circle',
+  },
+}
+
+export async function sendEtkinlikDurumEmail({ email, musteriAd, etkinlikAd, durum }) {
+  const sablon = DURUM_SABLONLARI[durum]
+  if (!sablon || !email) return null
+
+  const govde = `
+    <p style="font-size:1.05rem;color:${MARKA.slate};line-height:1.8;margin:0 0 1.2rem;">Sayın ${musteriAd || 'Müşterimiz'},</p>
+    <p style="color:#555;font-size:0.98rem;line-height:1.8;margin:0 0 1.5rem;">
+      <strong>${etkinlikAd}</strong> etkinliğinizle ilgili güncellemeniz aşağıdadır.
+    </p>
+    <div style="background:${MARKA.cream};border-left:3px solid ${MARKA.orange};padding:1.5rem 1.8rem;margin:0 0 1.5rem;">
+      <div style="margin-bottom:0.8rem;">
+        <span style="font-family:Arial,sans-serif;font-size:0.64rem;letter-spacing:0.15em;text-transform:uppercase;color:${MARKA.orange};">ETKİNLİK</span>
+        <p style="margin:0.2rem 0 0;font-size:1.05rem;color:${MARKA.slate};font-weight:600;">${etkinlikAd}</p>
+      </div>
+      <div>
+        <span style="font-family:Arial,sans-serif;font-size:0.64rem;letter-spacing:0.15em;text-transform:uppercase;color:${MARKA.orange};">DURUM</span>
+        <p style="margin:0.2rem 0 0;font-size:1.05rem;color:${MARKA.slate};font-weight:600;">${sablon.satir}</p>
+      </div>
+    </div>
+    <p style="color:#555;font-size:0.95rem;line-height:1.8;margin:0 0 1rem;">${sablon.govde}</p>
+    <p style="color:#555;font-size:0.95rem;line-height:1.8;margin:0;">Herhangi bir sorunuz olursa bize ulaşmaktan çekinmeyin.</p>`
+
+  const transporter = getTransporter()
+  return await transporter.sendMail({
+    from: `iyi event <${process.env.EMAIL_FROM}>`,
+    to: email,
+    subject: `${sablon.baslik} — ${etkinlikAd}`,
+    html: epostaKabuk(sablon.baslik, govde),
+  })
+}

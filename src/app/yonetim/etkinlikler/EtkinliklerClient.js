@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase-client'
+import { etkinlikDurumGuncelle } from './actions'
 import toast from 'react-hot-toast'
 
 const DURUMLAR = [
@@ -28,12 +29,12 @@ export default function EtkinliklerClient({ etkinlikler: initial, demo }) {
       setDegistiriliyor(null)
       return
     }
-    const { error } = await supabase.from('etkinlikler').update({ durum: yeniDurum }).eq('id', id)
-    if (error) {
-      toast.error('Güncelleme başarısız')
-    } else {
+    const sonuc = await etkinlikDurumGuncelle(id, yeniDurum)
+    if (sonuc.ok) {
       setEtkinlikler(prev => prev.map(e => e.id === id ? { ...e, durum: yeniDurum } : e))
-      toast.success('Durum güncellendi')
+      toast.success(sonuc.mesaj || 'Durum güncellendi')
+    } else {
+      toast.error(sonuc.error || 'Güncelleme başarısız')
     }
     setDegistiriliyor(null)
   }
