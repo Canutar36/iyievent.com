@@ -81,7 +81,7 @@ export async function proxy(request) {
     // Alt alan adının kökü → ilgili panelin girişine yönlendir
     if (path === '/') {
       const dest = request.nextUrl.clone()
-      dest.pathname = subdomain === 'portal' ? '/musteri/etkinlikler' : base
+      dest.pathname = subdomain === 'yonetim' ? '/yonetim' : '/musteri/etkinlikler'
       return NextResponse.redirect(dest)
     }
 
@@ -89,12 +89,12 @@ export async function proxy(request) {
     // yanlış alan adından erişilen tanıtım rotalarını kök alan adına bırakma,
     // sadece kendi namespace'i + paylaşılan rotalara izin ver.
     const paylasilan = path.startsWith('/giris') || path.startsWith('/kayit') || path.startsWith('/davet') || path.startsWith('/api') || path === '/robots.txt' || path === '/sitemap.xml'
-    const kendiNamespace = path.startsWith(base)
+    const kendiNamespace = path.startsWith('/musteri') || path.startsWith('/yonetim')
     if (!paylasilan && !kendiNamespace) {
       // Diğer panelin ya da tanıtımın rotasına bu alt alan adından girilmiş →
       // kendi köküne geri al.
       const dest = request.nextUrl.clone()
-      dest.pathname = subdomain === 'portal' ? '/musteri/etkinlikler' : base
+      dest.pathname = subdomain === 'yonetim' ? '/yonetim' : '/musteri/etkinlikler'
       return NextResponse.redirect(dest)
     }
   } else {
