@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useTransition } from 'react'
-import { kampanyaKaydet, kampanyaSil, icerikKaydet, icerikSil } from './actions'
+import { kampanyaKaydet, kampanyaSil, icerikKaydet, icerikSil, testGonderim } from './actions'
 
 const ORANGE = '#F05A28', GREEN = '#059669', INK = 'var(--color-slate)', MUTED = 'var(--color-slate-medium)'
 const inp = { width: '100%', fontFamily: 'var(--font-sans)', fontSize: '0.88rem', color: INK, background: '#fff', border: '1px solid var(--color-cream-dark)', padding: '0.55rem 0.7rem', outline: 'none', boxSizing: 'border-box' }
@@ -73,6 +73,7 @@ export default function PazarlamaClient({ data, demo }) {
       </div>
 
       {/* KAMPANYALAR */}
+      {tab === 'kampanyalar' && <TanitimKarti pending={pending} startTransition={startTransition} bildir={bildir} />}
       {tab === 'kampanyalar' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.2rem' }}>
           {kampanyalar.length === 0 && <div style={{ gridColumn: '1/-1', padding: '3rem', textAlign: 'center', color: MUTED, border: '2px dashed var(--color-cream-dark)' }}>Kampanya yok.</div>}
@@ -152,7 +153,7 @@ export default function PazarlamaClient({ data, demo }) {
       {/* PERFORMANS */}
       {tab === 'performans' && <Performans data={data} kampanyalar={kampanyalar} />}
 
-      {kForm && <KampanyaForm form={kForm} setForm={setKForm} segmentSayilari={data.segmentSayilari} pending={pending} onKaydet={() => startTransition(async () => {
+      {kForm && <KampanyaForm form={kForm} setForm={setKForm} segmentSayilari={data.segmentSayilari} pending={pending} bildir={bildir} startTransition={startTransition} onKaydet={() => startTransition(async () => {
         const r = await kampanyaKaydet(kForm); if (!r.ok) return bildir('hata', r.error)
         const yeni = { ...kForm, id: kForm.id || r.id, alici_sayisi: kForm.alici_sayisi || 0, acilma_sayisi: 0, tiklama_sayisi: 0, donusum_sayisi: 0 }
         setKampanyalar(p => kForm.id ? p.map(x => x.id === kForm.id ? { ...x, ...yeni } : x) : [yeni, ...p]); setKForm(null); bildir('basari', demo ? 'Demo: kampanya kaydedildi.' : 'Kaydedildi.')
@@ -183,6 +184,46 @@ export default function PazarlamaClient({ data, demo }) {
       )}
 
       <style>{`@media (max-width: 1000px) { .icerik-board { grid-template-columns: 1fr 1fr !important; } }`}</style>
+    </div>
+  )
+}
+
+/** Hazır kurumsal tanıtım e-postası: önizleme + test gönderimi. */
+function TanitimKarti({ pending, startTransition, bildir }) {
+  const [testMail, setTestMail] = useState('')
+
+  function testGonder() {
+    if (!testMail.trim()) return bildir('hata', 'Test için bir e-posta adresi girin.')
+    startTransition(async () => {
+      const r = await testGonderim({ kanal: 'tanitim', hedef: testMail.trim() })
+      bildir(r.ok ? 'basari' : 'hata', r.ok ? r.mesaj : r.error)
+    })
+  }
+
+  return (
+    <div style={{ background: '#fff', border: '1px solid var(--color-cream-dark)', borderLeft: `3px solid ${ORANGE}`, padding: '1.4rem 1.6rem', marginBottom: '1.4rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+        <div style={{ flex: '1 1 320px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
+            <i className="fas fa-envelope-open-text" style={{ color: ORANGE }} />
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', fontWeight: 500, color: INK, margin: 0 }}>Kurumsal Tanıtım E-postası</h2>
+          </div>
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '0.86rem', color: MUTED, margin: 0, lineHeight: 1.6 }}>
+            Logo, referans görselleri ve tüm hizmet kategorilerini içeren hazır şablon. Lead Havuzu’ndaki <strong>“Tanıtım Maili Gönder”</strong> butonu ve toplu kampanyalar bunu kullanır.
+          </p>
+        </div>
+        <a href="/api/pazarlama/onizleme" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', padding: '0.65rem 1.1rem', border: `1px solid ${ORANGE}`, background: 'var(--color-orange-light)', color: ORANGE, textDecoration: 'none', fontFamily: 'var(--font-display)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+          <i className="fas fa-eye" /> Şablonu Önizle
+        </a>
+      </div>
+
+      <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.1rem', flexWrap: 'wrap', alignItems: 'center', borderTop: '1px solid var(--color-cream)', paddingTop: '1rem' }}>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.64rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: MUTED }}>Test Gönderimi</span>
+        <input value={testMail} onChange={e => setTestMail(e.target.value)} placeholder="kendi@epostaniz.com" style={{ ...inp, flex: '1 1 220px', width: 'auto' }} onKeyDown={e => e.key === 'Enter' && testGonder()} />
+        <button onClick={testGonder} disabled={pending} className="btn-primary" style={{ padding: '0.55rem 1rem', fontSize: '0.72rem' }}>
+          <i className="fas fa-paper-plane" style={{ fontSize: '0.7rem' }} /> {pending ? 'Gönderiliyor…' : 'Test Gönder'}
+        </button>
+      </div>
     </div>
   )
 }
@@ -294,9 +335,29 @@ function Drawer({ baslik, onKapat, children, footer }) {
   )
 }
 
-function KampanyaForm({ form, setForm, segmentSayilari, pending, onKaydet }) {
+/** SMS metni için karakter/segment hesabı (lib/sms.js ile aynı kural). */
+function smsHesap(metin = '') {
+  const turkce = /[çğıöşüÇĞİÖŞÜ]/.test(metin)
+  const limit = turkce ? 70 : 160, coklu = turkce ? 67 : 153
+  const u = metin.length
+  return { uzunluk: u, turkce, limit, segment: u === 0 ? 0 : u <= limit ? 1 : Math.ceil(u / coklu) }
+}
+
+function KampanyaForm({ form, setForm, segmentSayilari, pending, onKaydet, bildir, startTransition }) {
   const set = (a, v) => setForm(f => ({ ...f, [a]: v }))
   const alici = segmentSayilari[form.hedef_segment] || 0
+  const [testHedef, setTestHedef] = useState('')
+  const sms = form.kanal === 'sms' ? smsHesap(form.icerik || '') : null
+
+  function testGonder() {
+    if (!testHedef.trim()) return bildir('hata', form.kanal === 'sms' ? 'Test için telefon girin.' : 'Test için e-posta girin.')
+    if (!form.icerik?.trim()) return bildir('hata', 'Önce içerik yazın.')
+    startTransition(async () => {
+      const r = await testGonderim({ kanal: form.kanal, hedef: testHedef.trim(), konu: form.konu || form.ad, icerik: form.icerik })
+      bildir(r.ok ? 'basari' : 'hata', r.ok ? r.mesaj : r.error)
+    })
+  }
+
   return (
     <Drawer baslik={form.id ? 'Kampanya Düzenle' : 'Yeni Kampanya'} onKapat={() => setForm(null)}
       footer={<button className="btn-primary" disabled={pending || !form.ad?.trim()} onClick={onKaydet} style={{ width: '100%', justifyContent: 'center', opacity: (pending || !form.ad?.trim()) ? 0.55 : 1 }}>{pending ? 'Kaydediliyor…' : 'Taslak Kaydet'}</button>}>
@@ -315,7 +376,27 @@ function KampanyaForm({ form, setForm, segmentSayilari, pending, onKaydet }) {
         <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: ORANGE, fontWeight: 600 }}><i className="fas fa-users" style={{ marginRight: '0.4rem' }} />{alici} alıcıya ulaşacak</div>
       </div>
       {form.kanal === 'email' && <div><label style={lbl}>E-posta Konusu</label><input style={inp} value={form.konu || ''} onChange={e => set('konu', e.target.value)} /></div>}
-      <div><label style={lbl}>{form.kanal === 'sms' ? 'SMS Metni' : 'İçerik'}</label><textarea style={{ ...inp, minHeight: '120px', resize: 'vertical' }} value={form.icerik || ''} onChange={e => set('icerik', e.target.value)} placeholder={form.kanal === 'sms' ? 'Kısa mesaj (160 karakter önerilir)' : 'Kampanya mesajınız…'} /></div>
+      <div>
+        <label style={lbl}>{form.kanal === 'sms' ? 'SMS Metni' : 'İçerik'}</label>
+        <textarea style={{ ...inp, minHeight: '120px', resize: 'vertical' }} value={form.icerik || ''} onChange={e => set('icerik', e.target.value)} placeholder={form.kanal === 'sms' ? 'Kısa mesaj (160 karakter = 1 SMS)' : 'Kampanya mesajınız…'} />
+        {sms && (
+          <div style={{ marginTop: '0.4rem', display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-sans)', fontSize: '0.74rem', color: sms.segment > 1 ? '#D97706' : MUTED }}>
+            <span>{sms.uzunluk} karakter · <strong>{sms.segment} SMS</strong>{sms.turkce ? ' (Türkçe karakter → 70/segment)' : ''}</span>
+            <span>{alici > 0 && sms.segment > 0 ? `≈ ${(alici * sms.segment).toLocaleString('tr-TR')} kredi` : ''}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Test gönderimi */}
+      <div style={{ borderTop: '1px solid var(--color-cream-dark)', paddingTop: '0.9rem' }}>
+        <label style={lbl}>Test Gönderimi (toplu göndermeden önce)</label>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <input value={testHedef} onChange={e => setTestHedef(e.target.value)} placeholder={form.kanal === 'sms' ? '05XX XXX XX XX' : 'kendi@epostaniz.com'} style={inp} />
+          <button onClick={testGonder} disabled={pending} style={{ whiteSpace: 'nowrap', padding: '0.55rem 0.9rem', cursor: 'pointer', border: `1px solid ${ORANGE}`, background: 'var(--color-orange-light)', color: ORANGE, fontFamily: 'var(--font-display)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase' }}>
+            <i className="fas fa-paper-plane" style={{ marginRight: '0.3rem' }} />Test
+          </button>
+        </div>
+      </div>
     </Drawer>
   )
 }

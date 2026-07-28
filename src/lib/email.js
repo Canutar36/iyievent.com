@@ -144,46 +144,103 @@ export async function sendOdemeHatirlatmaEmail({ email, etkinlikAd, tutar, link 
   })
 }
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://iyievent-com.vercel.app'
+
+/** Detaylı, kurumsal tanıtım e-postası HTML'i (tablo-tabanlı, tüm istemcilerle uyumlu). */
+export function tanitimEmailHtml(ad = '') {
+  const S = MARKA.slate, D = MARKA.slateDeep, O = MARKA.orange, C = MARKA.cream
+  const foto = (dosya, etiket) => `
+    <td width="33.3%" valign="top" style="padding:0 5px;">
+      <img src="${APP_URL}/assets/email/${dosya}" alt="${etiket}" width="100%" style="display:block;border:0;width:100%;height:auto;border-radius:3px;" />
+      <p style="margin:9px 0 0;font-family:Arial,sans-serif;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:${S};text-align:center;font-weight:bold;">${etiket}</p>
+    </td>`
+  const kategori = (baslik, metin) => `
+    <tr><td style="padding:0 0 12px;">
+      <p style="margin:0 0 3px;font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:${O};font-weight:bold;">${baslik}</p>
+      <p style="margin:0;font-family:Arial,sans-serif;font-size:13.5px;line-height:1.6;color:#555;">${metin}</p>
+    </td></tr>`
+
+  return `<!DOCTYPE html>
+<html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="x-apple-disable-message-reformatting"><title>iyi event</title></head>
+<body style="margin:0;padding:0;background:${C};-webkit-text-size-adjust:100%;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">Kurumsal galalardan düğünlere, her etkinlik tek elden ve kusursuz. iyi event ile tanışın.</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C};"><tr><td align="center" style="padding:24px 12px;">
+    <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:100%;background:#ffffff;">
+      <!-- Logo -->
+      <tr><td align="center" style="padding:34px 32px 6px;">
+        <img src="${APP_URL}/assets/email/logo.png" alt="iyi event" width="190" style="display:block;border:0;width:190px;max-width:58%;height:auto;" />
+      </td></tr>
+      <!-- Hero -->
+      <tr><td style="padding:10px 28px 0;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="background:${S};padding:42px 30px;text-align:center;">
+          <p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.25em;text-transform:uppercase;color:${O};">Etkinlik &amp; Organizasyon</p>
+          <h1 style="margin:0;font-family:Georgia,'Times New Roman',serif;font-weight:normal;font-size:30px;line-height:1.25;color:${C};">Anlarınızı Sanata<br>Dönüştürüyoruz</h1>
+        </td></tr></table>
+      </td></tr>
+      <!-- Giriş -->
+      <tr><td style="padding:30px 36px 6px;">
+        <p style="margin:0 0 14px;font-family:Georgia,serif;font-size:18px;color:${S};">Sayın ${ad || 'Yetkili'},</p>
+        <p style="margin:0;font-family:Arial,sans-serif;font-size:14.5px;line-height:1.75;color:#555;">
+          <strong style="color:${S};">iyi event</strong> olarak kurumsal galalardan bespoke düğünlere, açık hava festivallerinden
+          çocuk şenliklerine kadar her ölçekte etkinliği <strong style="color:${S};">tek elden</strong> planlıyoruz —
+          konsept tasarımından operasyona, catering'den prodüksiyona kusursuz bir kurgu ile.
+        </p>
+      </td></tr>
+      <!-- Foto showcase -->
+      <tr><td style="padding:24px 31px 6px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+          ${foto('gala.jpg', 'Kurumsal &amp; Gala')}
+          ${foto('wedding.jpg', 'Düğün &amp; Nişan')}
+          ${foto('soiree.jpg', 'Özel &amp; Tematik')}
+        </tr></table>
+      </td></tr>
+      <!-- Hizmet kategorileri -->
+      <tr><td style="padding:22px 36px 0;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+          ${kategori('Kurumsal', 'Bayi toplantıları &amp; kongreler, lansmanlar, gala geceleri, açılış organizasyonları, fuar &amp; stant, team building.')}
+          ${kategori('Bireysel &amp; Özel Gün', 'Evlilik teklifi, düğün &amp; nişan, kına gecesi, söz &amp; isteme, doğum günü, gender reveal, baby shower, sünnet.')}
+          ${kategori('Tematik &amp; Açık Hava', 'Lüks/bohem piknikler, açık hava sinema, festival &amp; panayır, atölye &amp; workshop, doğa organizasyonları.')}
+          ${kategori('Çocuk &amp; Geleneksel', 'Tematik çocuk partileri, AVM şenlikleri, iftar &amp; sahur davetleri, anma &amp; taziye ikramları.')}
+        </table>
+      </td></tr>
+      <!-- Ek hizmetler -->
+      <tr><td style="padding:8px 36px 0;">
+        <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;line-height:1.7;color:#777;">
+          Ayrıca: LED ekran &amp; ses/sahne/truss kiralama, sokak lezzetleri &amp; kokteyl catering, prodüksiyon, ajans &amp; medya hizmetleri.
+        </p>
+      </td></tr>
+      <!-- CTA -->
+      <tr><td align="center" style="padding:30px 32px 8px;">
+        <a href="tel:+902129939939" style="display:inline-block;background:${O};color:#ffffff;padding:15px 42px;text-decoration:none;font-family:Arial,sans-serif;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;font-weight:bold;">Hemen İletişime Geçin</a>
+        <p style="margin:16px 0 0;font-family:Arial,sans-serif;font-size:14px;color:${S};">0212 993 99 39 &nbsp;·&nbsp; bilgi@iyievent.com</p>
+      </td></tr>
+      <!-- Footer -->
+      <tr><td style="padding:22px 28px 30px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="background:${D};padding:24px;text-align:center;">
+          <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:12px;color:rgba(246,243,234,0.65);">iyi event · Etkinlik &amp; Organizasyon Tasarımı</p>
+          <p style="margin:0;font-family:Arial,sans-serif;font-size:11.5px;color:rgba(246,243,234,0.4);">bilgi@iyievent.com &nbsp;·&nbsp; 0212 993 99 39 &nbsp;·&nbsp; iyievent.com</p>
+        </td></tr></table>
+        <p style="margin:14px 0 0;font-family:Arial,sans-serif;font-size:10.5px;line-height:1.6;color:#aaa;text-align:center;">
+          Bu e-postayı iyi event ile ilgilenebileceğinizi düşündüğümüz için aldınız.<br>
+          Bu tür iletileri almak istemiyorsanız
+          <a href="mailto:bilgi@iyievent.com?subject=Ticari%20ileti%20almak%20istemiyorum&amp;body=Listenizden%20cikarilmak%20istiyorum." style="color:#888;text-decoration:underline;">buraya tıklayarak</a>
+          bildirebilirsiniz; talebiniz derhal işlenir.
+        </p>
+      </td></tr>
+    </table>
+  </td></tr></table>
+</body></html>`
+}
+
 /**
  * Kurumsal tanıtım e-postası (E-Marketing → lead'e).
- * Şirketin tüm hizmet yelpazesini anlatan kapsamlı, kurumsal mail.
  */
 export async function sendTanitimEmail({ email, ad }) {
-  const hizmetBlok = (baslik, kalemler) => `
-    <div style="margin-bottom:1.6rem;">
-      <p style="font-family:Arial,sans-serif;font-size:0.66rem;letter-spacing:0.18em;text-transform:uppercase;color:${MARKA.orange};margin:0 0 0.5rem;">${baslik}</p>
-      <p style="color:#555;font-size:0.95rem;line-height:1.7;margin:0;">${kalemler}</p>
-    </div>`
-
-  const govde = `
-    <p style="font-size:1.05rem;color:${MARKA.slate};line-height:1.8;margin:0 0 1.2rem;">Sayın ${ad || 'Yetkili'},</p>
-    <p style="color:#555;font-size:0.98rem;line-height:1.8;margin:0 0 1.8rem;">
-      <strong>iyi event</strong> olarak, kurumsal galalardan bespoke düğünlere, açık hava festivallerinden
-      çocuk şenliklerine kadar her ölçekte etkinliği uçtan uca planlıyor; konsept tasarımından
-      operasyona, catering'den prodüksiyona tüm süreci tek elden kusursuzca yönetiyoruz.
-    </p>
-
-    <div style="background:${MARKA.cream};border-left:3px solid ${MARKA.orange};padding:1.6rem 1.8rem;margin:0 0 1.8rem;">
-      ${hizmetBlok('Kurumsal', 'Bayi toplantıları & kongreler, lansmanlar, gala geceleri, açılış organizasyonları, fuar & stant, team building.')}
-      ${hizmetBlok('Bireysel & Özel Gün', 'Evlilik teklifi, düğün & nişan, kına gecesi, söz & isteme, doğum günü, gender reveal, baby shower, sünnet.')}
-      ${hizmetBlok('Tematik & Açık Hava', 'Lüks/bohem piknikler, açık hava sinema, festival & panayır, atölye & workshop, doğa organizasyonları.')}
-      ${hizmetBlok('Çocuk & Geleneksel', 'Tematik çocuk partileri, AVM şenlikleri, iftar & sahur davetleri, anma & taziye ikramları.')}
-    </div>
-
-    <p style="color:#555;font-size:0.98rem;line-height:1.8;margin:0 0 1.8rem;">
-      Ek hizmetlerimiz: LED ekran & ses/sahne/truss kiralama, sokak lezzetleri & kokteyl catering,
-      prodüksiyon, ajans & medya hizmetleri. Bütçenize ve hayalinize özel bir teklif için memnuniyetle yanınızdayız.
-    </p>
-
-    <div style="text-align:center;margin:2rem 0 0.5rem;">
-      <a href="tel:02129939939" style="display:inline-block;background:${MARKA.orange};color:#fff;padding:0.95rem 2.4rem;text-decoration:none;font-family:Arial,sans-serif;font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;">Hemen İletişime Geçin</a>
-    </div>`
-
   return await resend.emails.send({
     from: `iyi event <${process.env.EMAIL_FROM}>`,
     to: email,
     subject: 'iyi event — Kusursuz Etkinlik & Organizasyon Çözümleri',
-    html: epostaKabuk('Etkinliklerinizi Sanata Dönüştürüyoruz', govde),
+    html: tanitimEmailHtml(ad),
   })
 }
 

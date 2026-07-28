@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# gecici onizleme dosyalari
+_tanitim-onizleme.html
+_*.mjs

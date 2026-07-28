@@ -3,8 +3,8 @@
 import { createServiceClient } from '@/lib/supabase-server'
 import { isDevPreview } from '@/lib/config'
 import { rolGuard } from '@/lib/guard'
-import { sendKampanyaEmail } from '@/lib/email'
-import { sendSMS } from '@/lib/sms'
+import { sendKampanyaEmail, sendTanitimEmail } from '@/lib/email'
+import { sendSMS, smsBilgi } from '@/lib/sms'
 import { logAktivite } from '@/lib/aktivite'
 import { revalidatePath } from 'next/cache'
 
@@ -73,6 +73,33 @@ export async function kampanyaGonder(kampanyaId, veri = {}) {
 
   revalidatePath('/yonetim/pazarlama')
   return { ok: true, alici_sayisi: alicilar.length, gonderim_tarihi: guncelle.gonderim_tarihi }
+}
+
+/**
+ * Test gönderimi — toplu göndermeden ÖNCE tek bir adrese/numaraya deneme.
+ * kanal 'email' ise konu+içerik ile kampanya maili; 'tanitim' ise hazır tanıtım maili.
+ */
+export async function testGonderim({ kanal, hedef, konu, icerik, ad }) {
+  const g = await rolGuard(['satis'])
+  if (!g.ok) return { ok: false, error: g.error }
+  if (!hedef?.trim()) return { ok: false, error: 'Test için e-posta/telefon girin.' }
+
+  try {
+    if (kanal === 'sms') {
+      const bilgi = smsBilgi(icerik || '')
+      const r = await sendSMS(hedef, icerik || '')
+      if (!r.success) return { ok: false, error: r.error }
+      return { ok: true, mesaj: `Test SMS gönderildi (${bilgi.segment} segment, ${bilgi.uzunluk} karakter).` }
+    }
+    if (kanal === 'tanitim') {
+      await sendTanitimEmail({ email: hedef.trim(), ad: ad || 'Örnek Firma A.Ş.' })
+      return { ok: true, mesaj: `Tanıtım e-postası ${hedef} adresine gönderildi.` }
+    }
+    await sendKampanyaEmail({ emails: [hedef.trim()], konu, baslik: konu, icerik })
+    return { ok: true, mesaj: `Test e-postası ${hedef} adresine gönderildi.` }
+  } catch (e) {
+    return { ok: false, error: 'Gönderim hatası: ' + e.message }
+  }
 }
 
 export async function kampanyaSil(id) {
