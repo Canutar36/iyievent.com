@@ -1,5 +1,9 @@
-import { createClient } from '@/lib/supabase-server'
+'use client'
+
+import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase-client'
 import Link from 'next/link'
+import EtkinlikTalepForm from '@/components/portal/EtkinlikTalepForm'
 
 const durumRengi = {
   talep: { bg: '#FEF3C7', text: '#D97706', label: 'Talep Alındı' },
@@ -9,33 +13,88 @@ const durumRengi = {
   iptal: { bg: '#FEE2E2', text: '#DC2626', label: 'İptal' },
 }
 
-export default async function EtkinliklerPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+export default function EtkinliklerPage() {
+  const [etkinlikler, setEtkinlikler] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
 
-  const { data: etkinlikler } = await supabase
-    .from('etkinlikler')
-    .select('*')
-    .eq('musteri_id', user.id)
-    .order('created_at', { ascending: false })
+  const supabase = createClient()
+
+  useEffect(() => {
+    loadEtkinlikler()
+  }, [])
+
+  async function loadEtkinlikler() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const { data } = await supabase
+      .from('etkinlikler')
+      .select('*')
+      .eq('musteri_id', user.id)
+      .order('created_at', { ascending: false })
+
+    if (data) setEtkinlikler(data)
+    setLoading(false)
+  }
+
+  if (loading) {
+    return (
+      <div>
+        <div className="skeleton" style={{ width: '200px', height: '32px', marginBottom: '1rem' }} />
+        <div className="skeleton" style={{ width: '300px', height: '48px', marginBottom: '2.5rem' }} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.5rem' }}>
+          {[1, 2, 3].map(i => (
+            <div key={i} className="skeleton" style={{ height: '250px', borderRadius: '12px' }} />
+          ))}
+        </div>
+        <style>{`
+          .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 4px;
+          }
+          @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+          }
+        `}</style>
+      </div>
+    )
+  }
 
   return (
     <div>
+      <EtkinlikTalepForm isOpen={showForm} onClose={() => setShowForm(false)} />
+
       {/* Header */}
-      <div style={{ marginBottom: '2.5rem' }}>
-        <p style={{
-          fontFamily: 'var(--font-display)', fontSize: '0.72rem', fontWeight: 700,
-          letterSpacing: '0.2em', textTransform: 'uppercase',
-          color: 'var(--color-orange)', marginBottom: '0.4rem',
-        }}>Hoş Geldiniz</p>
-        <h1 style={{
-          fontFamily: 'var(--font-serif)', fontSize: '2.2rem', fontWeight: 400,
-          color: 'var(--color-slate)', margin: 0,
-        }}>Etkinliklerim</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2.5rem' }}>
+        <div>
+          <p style={{
+            fontFamily: 'var(--font-display)', fontSize: '0.72rem', fontWeight: 700,
+            letterSpacing: '0.2em', textTransform: 'uppercase',
+            color: 'var(--color-orange)', marginBottom: '0.4rem',
+          }}>Hoş Geldiniz</p>
+          <h1 style={{
+            fontFamily: 'var(--font-serif)', fontSize: '2.2rem', fontWeight: 400,
+            color: 'var(--color-slate)', margin: 0,
+          }}>Etkinliklerim</h1>
+        </div>
+        <button onClick={() => setShowForm(true)} style={{
+          padding: '0.7rem 1.3rem', borderRadius: '8px',
+          background: 'var(--color-orange)', color: 'white', border: 'none',
+          cursor: 'pointer', fontFamily: 'var(--font-display)', fontSize: '0.75rem',
+          fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase',
+          display: 'flex', alignItems: 'center', gap: '0.5rem',
+        }}>
+          <i className="fas fa-plus" style={{ fontSize: '0.7rem' }} />
+          Etkinlik Talep Et
+        </button>
       </div>
 
       {/* Boş durum */}
-      {(!etkinlikler || etkinlikler.length === 0) && (
+      {etkinlikler.length === 0 && (
         <div style={{
           textAlign: 'center', padding: '5rem 2rem',
           border: '2px dashed var(--color-cream-dark)',
@@ -51,10 +110,10 @@ export default async function EtkinliklerPage() {
           <p style={{ color: 'var(--color-slate-medium)', marginBottom: '2rem' }}>
             iyi event ekibi sizin için bir etkinlik oluşturacak.
           </p>
-          <a href="/#contact" className="btn-primary" style={{ display: 'inline-flex' }}>
+          <button onClick={() => setShowForm(true)} className="btn-primary" style={{ display: 'inline-flex' }}>
             Etkinlik Talep Et
             <i className="fas fa-arrow-right" style={{ fontSize: '0.75rem' }} />
-          </a>
+          </button>
         </div>
       )}
 
@@ -64,7 +123,7 @@ export default async function EtkinliklerPage() {
         gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
         gap: '1.5rem',
       }}>
-        {etkinlikler?.map(etkinlik => {
+        {etkinlikler.map(etkinlik => {
           const durum = durumRengi[etkinlik.durum] || durumRengi.talep
           const odemeYuzdesi = etkinlik.toplam_tutar
             ? Math.round((etkinlik.odenen_tutar / etkinlik.toplam_tutar) * 100)

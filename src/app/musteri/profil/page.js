@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase-client'
 import toast from 'react-hot-toast'
 
@@ -9,8 +9,10 @@ export default function ProfilPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [changingPassword, setChangingPassword] = useState(false)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [form, setForm] = useState({ full_name: '', phone: '', email: '' })
   const [passwordForm, setPasswordForm] = useState({ newPassword: '', confirmPassword: '' })
+  const fileInputRef = useRef(null)
 
   const supabase = createClient()
 
@@ -37,6 +39,45 @@ export default function ProfilPage() {
       })
     }
     setLoading(false)
+  }
+
+  async function handleAvatarUpload(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Fotoğraf 2MB\'dan küçük olmalı')
+      return
+    }
+
+    setUploadingAvatar(true)
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${profile.id}/avatar.${fileExt}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatarlar')
+        .upload(fileName, file, { upsert: true })
+
+      if (uploadError) throw uploadError
+
+      const { data: urlData } = supabase.storage
+        .from('avatarlar')
+        .getPublicUrl(fileName)
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: urlData.publicUrl })
+        .eq('id', profile.id)
+
+      if (updateError) throw updateError
+
+      setProfile({ ...profile, avatar_url: urlData.publicUrl })
+      toast.success('Profil fotoğrafı güncellendi')
+    } catch (err) {
+      toast.error('Fotoğraf yüklenirken hata oluştu: ' + err.message)
+    }
+    setUploadingAvatar(false)
   }
 
   async function handleSaveProfile(e) {
@@ -117,6 +158,67 @@ export default function ProfilPage() {
       }}>
         Profilim
       </h1>
+
+      {/* Avatar Section */}
+      <div style={{
+        background: 'white', borderRadius: '12px', padding: '2rem',
+        border: '1px solid rgba(0,0,0,0.05)', marginBottom: '1.5rem',
+        display: 'flex', alignItems: 'center', gap: '1.5rem',
+      }}>
+        <div
+          onClick={() => fileInputRef.current?.click()}
+          style={{
+            width: '80px', height: '80px', borderRadius: '50%',
+            background: profile?.avatar_url ? 'transparent' : 'var(--color-orange-light)',
+            border: '2px solid rgba(240,90,40,0.3)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', overflow: 'hidden', position: 'relative',
+            flexShrink: 0,
+          }}
+        >
+          {profile?.avatar_url ? (
+            <img src={profile.avatar_url} alt="Profil" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            <i className="fas fa-user" style={{ color: 'var(--color-orange)', fontSize: '1.5rem' }} />
+          )}
+          {uploadingAvatar && (
+            <div style={{
+              position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <i className="fas fa-spinner fa-spin" style={{ color: 'white' }} />
+            </div>
+          )}
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleAvatarUpload}
+          style={{ display: 'none' }}
+        />
+        <div>
+          <div style={{
+            fontFamily: 'var(--font-sans)', fontSize: '0.95rem', fontWeight: 600,
+            color: 'var(--color-slate-deep)', marginBottom: '0.3rem',
+          }}>
+            {profile?.full_name || 'Müşteri'}
+          </div>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploadingAvatar}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              fontFamily: 'var(--font-sans)', fontSize: '0.8rem',
+              color: 'var(--color-orange)', padding: 0,
+              display: 'flex', alignItems: 'center', gap: '0.4rem',
+            }}
+          >
+            <i className="fas fa-camera" style={{ fontSize: '0.75rem' }} />
+            {uploadingAvatar ? 'Yükleniyor...' : 'Fotoğraf Değiştir'}
+          </button>
+        </div>
+      </div>
 
       {/* Profile Form */}
       <div style={{

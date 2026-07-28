@@ -7,6 +7,7 @@ import { Logo } from '@/components/Logo'
 
 const navItems = [
   { href: '/musteri/etkinlikler', icon: 'fas fa-calendar-alt', label: 'Etkinliklerim' },
+  { href: '/musteri/gorseller', icon: 'fas fa-images', label: 'Görsellerim' },
   { href: '/musteri/teklifler', icon: 'fas fa-file-invoice-dollar', label: 'Teklifler' },
   { href: '/musteri/sozlesmeler', icon: 'fas fa-file-contract', label: 'Sözleşmeler' },
   { href: '/musteri/faturalar', icon: 'fas fa-receipt', label: 'Faturalar' },
@@ -51,13 +52,17 @@ export default function MusteriSidebar({ profile, isOpen, onClose }) {
         <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(246,243,234,0.06)' }}>
           <div style={{
             width: '44px', height: '44px', borderRadius: '50%',
-            background: 'var(--color-orange-light)',
+            background: profile?.avatar_url ? 'transparent' : 'var(--color-orange-light)',
             border: '2px solid rgba(240,90,40,0.3)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: 'var(--color-orange)', fontSize: '1rem',
-            marginBottom: '0.8rem',
+            marginBottom: '0.8rem', overflow: 'hidden',
           }}>
-            <i className="fas fa-user" />
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="Profil" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <i className="fas fa-user" />
+            )}
           </div>
           <div style={{
             fontFamily: 'var(--font-sans)', fontSize: '0.88rem', fontWeight: 600,
