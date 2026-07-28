@@ -88,7 +88,7 @@ export async function proxy(request) {
     // Bu alt alan adında olmaması gereken bölümler ana siteye ait —
     // yanlış alan adından erişilen tanıtım rotalarını kök alan adına bırakma,
     // sadece kendi namespace'i + paylaşılan rotalara izin ver.
-    const paylasilan = path.startsWith('/giris') || path.startsWith('/kayit') || path.startsWith('/davet') || path.startsWith('/api')
+    const paylasilan = path.startsWith('/giris') || path.startsWith('/kayit') || path.startsWith('/davet') || path.startsWith('/api') || path === '/robots.txt' || path === '/sitemap.xml'
     const kendiNamespace = path.startsWith(base)
     if (!paylasilan && !kendiNamespace) {
       // Diğer panelin ya da tanıtımın rotasına bu alt alan adından girilmiş →
