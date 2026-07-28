@@ -18,30 +18,30 @@ const MARKA = {
 }
 
 function epostaKabuk(icBaslik, govde) {
-  const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://iyievent-com.vercel.app'
-  return `
-  <!DOCTYPE html>
-  <html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-  <body style="margin:0;padding:0;background:${MARKA.cream};font-family:Georgia,'Times New Roman',serif;">
-    <div style="max-width:620px;margin:0 auto;background:#FFFFFF;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFFFFF;">
-        <tr><td align="center" style="padding:34px 32px 10px;">
-          <img src="${APP_URL}/assets/email/logo.png" alt="iyi event" width="190" style="display:block;border:0;width:190px;max-width:58%;height:auto;" />
-        </td></tr>
-        <tr><td style="padding:0 28px;">
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="background:${MARKA.slate};padding:36px 30px;text-align:center;">
-            <h1 style="font-family:Georgia,serif;font-weight:300;font-size:1.8rem;color:${MARKA.cream};margin:0;line-height:1.3;">${icBaslik}</h1>
-          </td></tr></table>
-        </td></tr>
-      </table>
-      <div style="padding:2.8rem 2.5rem;">${govde}</div>
-      <div style="background:${MARKA.slateDeep};padding:1.8rem 2.5rem;text-align:center;">
-        <p style="color:rgba(246,243,234,0.5);font-family:Arial,sans-serif;font-size:0.75rem;margin:0;line-height:1.7;">
-          iyi event &nbsp;|&nbsp; ${MARKA.mail} &nbsp;|&nbsp; ${MARKA.tel}<br>${MARKA.site}
-        </p>
-      </div>
-    </div>
-  </body></html>`
+  const S = MARKA.slate, D = MARKA.slateDeep, O = MARKA.orange, C = MARKA.cream
+  return `<!DOCTYPE html>
+<html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="x-apple-disable-message-reformatting"><title>iyi event</title></head>
+<body style="margin:0;padding:0;background:${C};-webkit-text-size-adjust:100%;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C};"><tr><td align="center" style="padding:24px 12px;">
+    <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:100%;background:#ffffff;">
+      <tr><td align="center" style="padding:34px 32px 10px;">
+        <img src="${APP_URL}/assets/email/logo.png" alt="iyi event" width="190" style="display:block;border:0;width:190px;max-width:58%;height:auto;" />
+      </td></tr>
+      <tr><td style="padding:0 28px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="background:${S};padding:36px 30px;text-align:center;">
+          <h1 style="margin:0;font-family:Georgia,'Times New Roman',serif;font-weight:normal;font-size:26px;line-height:1.3;color:${C};">${icBaslik}</h1>
+        </td></tr></table>
+      </td></tr>
+      <tr><td style="padding:30px 36px 6px;">${govde}</td></tr>
+      <tr><td style="padding:22px 28px 30px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="background:${D};padding:24px;text-align:center;">
+          <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:12px;color:rgba(246,243,234,0.65);">iyi event · Etkinlik &amp; Organizasyon Tasarımı</p>
+          <p style="margin:0;font-family:Arial,sans-serif;font-size:11.5px;color:rgba(246,243,234,0.4);">${MARKA.mail} · ${MARKA.tel} · ${MARKA.site}</p>
+        </td></tr></table>
+      </td></tr>
+    </table>
+  </td></tr></table>
+</body></html>`
 }
 
 export async function sendDavetiyeEmail({ misafir, etkinlik }) {
