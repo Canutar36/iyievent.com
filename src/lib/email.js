@@ -1,13 +1,22 @@
-import { Resend } from 'resend'
+import nodemailer from 'nodemailer'
 
-const resend = new Resend(process.env.RESEND_API_KEY || 're_1234567890')
+function getTransporter() {
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.hostinger.com',
+    port: parseInt(process.env.SMTP_PORT || '465'),
+    secure: (process.env.SMTP_PORT || '465') === '465',
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  })
+}
 
 const MARKA = {
   slate: '#2A3538', slateDeep: '#141A1B', orange: '#F05A28', cream: '#F6F3EA',
   tel: '0212 993 99 39', mail: 'bilgi@iyievent.com', site: 'iyievent.com',
 }
 
-/** Ortak kurumsal e-posta iskeleti. */
 function epostaKabuk(icBaslik, govde) {
   return `
   <!DOCTYPE html>
@@ -28,9 +37,6 @@ function epostaKabuk(icBaslik, govde) {
   </body></html>`
 }
 
-/**
- * Davetiye e-postası gönder
- */
 export async function sendDavetiyeEmail({ misafir, etkinlik }) {
   const qrUrl = `${process.env.NEXT_PUBLIC_APP_URL}/davet/${misafir.qr_kod}`
   
@@ -90,7 +96,8 @@ export async function sendDavetiyeEmail({ misafir, etkinlik }) {
     </html>
   `
 
-  return await resend.emails.send({
+  const transporter = getTransporter()
+  return await transporter.sendMail({
     from: `iyi event <${process.env.EMAIL_FROM}>`,
     to: misafir.email,
     subject: `Davetiye: ${etkinlik.ad}`,
@@ -98,11 +105,9 @@ export async function sendDavetiyeEmail({ misafir, etkinlik }) {
   })
 }
 
-/**
- * Müşteriye sözleşme hazır bildirimi gönder
- */
 export async function sendSozlesmeEmail({ email, etkinlikAd, belgeAd }) {
-  return await resend.emails.send({
+  const transporter = getTransporter()
+  return await transporter.sendMail({
     from: `iyi event <${process.env.EMAIL_FROM}>`,
     to: email,
     subject: `Sözleşmeniz Hazır — ${etkinlikAd}`,
@@ -123,11 +128,9 @@ export async function sendSozlesmeEmail({ email, etkinlikAd, belgeAd }) {
   })
 }
 
-/**
- * Ödeme hatırlatma maili
- */
 export async function sendOdemeHatirlatmaEmail({ email, etkinlikAd, tutar, link }) {
-  return await resend.emails.send({
+  const transporter = getTransporter()
+  return await transporter.sendMail({
     from: `iyi event <${process.env.EMAIL_FROM}>`,
     to: email,
     subject: `Ödeme Hatırlatması — ${etkinlikAd}`,
@@ -146,7 +149,6 @@ export async function sendOdemeHatirlatmaEmail({ email, etkinlikAd, tutar, link 
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://iyievent-com.vercel.app'
 
-/** Detaylı, kurumsal tanıtım e-postası HTML'i (tablo-tabanlı, tüm istemcilerle uyumlu). */
 export function tanitimEmailHtml(ad = '') {
   const S = MARKA.slate, D = MARKA.slateDeep, O = MARKA.orange, C = MARKA.cream
   const foto = (dosya, etiket) => `
@@ -166,18 +168,15 @@ export function tanitimEmailHtml(ad = '') {
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;">Kurumsal galalardan düğünlere, her etkinlik tek elden ve kusursuz. iyi event ile tanışın.</div>
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C};"><tr><td align="center" style="padding:24px 12px;">
     <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:100%;background:#ffffff;">
-      <!-- Logo -->
       <tr><td align="center" style="padding:34px 32px 6px;">
         <img src="${APP_URL}/assets/email/logo.png" alt="iyi event" width="190" style="display:block;border:0;width:190px;max-width:58%;height:auto;" />
       </td></tr>
-      <!-- Hero -->
       <tr><td style="padding:10px 28px 0;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="background:${S};padding:42px 30px;text-align:center;">
           <p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.25em;text-transform:uppercase;color:${O};">Etkinlik &amp; Organizasyon</p>
           <h1 style="margin:0;font-family:Georgia,'Times New Roman',serif;font-weight:normal;font-size:30px;line-height:1.25;color:${C};">Anlarınızı Sanata<br>Dönüştürüyoruz</h1>
         </td></tr></table>
       </td></tr>
-      <!-- Giriş -->
       <tr><td style="padding:30px 36px 6px;">
         <p style="margin:0 0 14px;font-family:Georgia,serif;font-size:18px;color:${S};">Sayın ${ad || 'Yetkili'},</p>
         <p style="margin:0;font-family:Arial,sans-serif;font-size:14.5px;line-height:1.75;color:#555;">
@@ -186,7 +185,6 @@ export function tanitimEmailHtml(ad = '') {
           konsept tasarımından operasyona, catering'den prodüksiyona kusursuz bir kurgu ile.
         </p>
       </td></tr>
-      <!-- Foto showcase -->
       <tr><td style="padding:24px 31px 6px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
           ${foto('gala.jpg', 'Kurumsal &amp; Gala')}
@@ -194,7 +192,6 @@ export function tanitimEmailHtml(ad = '') {
           ${foto('soiree.jpg', 'Özel &amp; Tematik')}
         </tr></table>
       </td></tr>
-      <!-- Hizmet kategorileri -->
       <tr><td style="padding:22px 36px 0;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
           ${kategori('Kurumsal', 'Bayi toplantıları &amp; kongreler, lansmanlar, gala geceleri, açılış organizasyonları, fuar &amp; stant, team building.')}
@@ -203,18 +200,15 @@ export function tanitimEmailHtml(ad = '') {
           ${kategori('Çocuk &amp; Geleneksel', 'Tematik çocuk partileri, AVM şenlikleri, iftar &amp; sahur davetleri, anma &amp; taziye ikramları.')}
         </table>
       </td></tr>
-      <!-- Ek hizmetler -->
       <tr><td style="padding:8px 36px 0;">
         <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;line-height:1.7;color:#777;">
           Ayrıca: LED ekran &amp; ses/sahne/truss kiralama, sokak lezzetleri &amp; kokteyl catering, prodüksiyon, ajans &amp; medya hizmetleri.
         </p>
       </td></tr>
-      <!-- CTA -->
       <tr><td align="center" style="padding:30px 32px 8px;">
         <a href="tel:+902129939939" style="display:inline-block;background:${O};color:#ffffff;padding:15px 42px;text-decoration:none;font-family:Arial,sans-serif;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;font-weight:bold;">Hemen İletişime Geçin</a>
         <p style="margin:16px 0 0;font-family:Arial,sans-serif;font-size:14px;color:${S};">0212 993 99 39 &nbsp;·&nbsp; bilgi@iyievent.com</p>
       </td></tr>
-      <!-- Footer -->
       <tr><td style="padding:22px 28px 30px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="background:${D};padding:24px;text-align:center;">
           <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:12px;color:rgba(246,243,234,0.65);">iyi event · Etkinlik &amp; Organizasyon Tasarımı</p>
@@ -232,11 +226,9 @@ export function tanitimEmailHtml(ad = '') {
 </body></html>`
 }
 
-/**
- * Kurumsal tanıtım e-postası (E-Marketing → lead'e).
- */
 export async function sendTanitimEmail({ email, ad }) {
-  return await resend.emails.send({
+  const transporter = getTransporter()
+  return await transporter.sendMail({
     from: `iyi event <${process.env.EMAIL_FROM}>`,
     to: email,
     subject: 'iyi event — Kusursuz Etkinlik & Organizasyon Çözümleri',
@@ -244,9 +236,6 @@ export async function sendTanitimEmail({ email, ad }) {
   })
 }
 
-/**
- * Randevu oluşturuldu e-postası (müşteriye).
- */
 export async function sendRandevuEmail({ email, ad, tarih, saat, konum }) {
   const tarihStr = tarih
     ? new Date(tarih).toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
@@ -270,7 +259,8 @@ export async function sendRandevuEmail({ email, ad, tarih, saat, konum }) {
     </div>
     <p style="color:#555;font-size:0.95rem;line-height:1.8;margin:0;">Sabırsızlıkla bekliyoruz.</p>`
 
-  return await resend.emails.send({
+  const transporter = getTransporter()
+  return await transporter.sendMail({
     from: `iyi event <${process.env.EMAIL_FROM}>`,
     to: email,
     subject: 'Randevunuz Oluşturuldu — iyi event',
@@ -278,15 +268,6 @@ export async function sendRandevuEmail({ email, ad, tarih, saat, konum }) {
   })
 }
 
-/**
- * Toplu kampanya e-postası (Dijital Pazarlama).
- * @param {object} p
- * @param {string[]} p.emails - Alıcı e-posta listesi
- * @param {string} p.konu
- * @param {string} p.baslik - Kabuk başlığı
- * @param {string} p.icerik - Gövde metni (düz metin/HTML)
- * Resend batch API ile gönderir (max 100/istek). Alıcı yoksa no-op.
- */
 export async function sendKampanyaEmail({ emails = [], konu, baslik, icerik }) {
   const liste = (emails || []).filter(Boolean)
   if (liste.length === 0) return { gonderilen: 0 }
@@ -297,13 +278,16 @@ export async function sendKampanyaEmail({ emails = [], konu, baslik, icerik }) {
       <a href="https://iyievent.com" style="display:inline-block;background:${MARKA.orange};color:#fff;padding:0.9rem 2.2rem;text-decoration:none;font-family:Arial,sans-serif;font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;">Detaylı Bilgi</a>
     </div>`)
 
-  // 100'erli gruplar halinde batch gönder
+  const transporter = getTransporter()
   let gonderilen = 0
-  for (let i = 0; i < liste.length; i += 100) {
-    const grup = liste.slice(i, i + 100)
-    const payload = grup.map(to => ({ from: `iyi event <${process.env.EMAIL_FROM}>`, to, subject: konu || 'iyi event', html }))
-    await resend.batch.send(payload)
-    gonderilen += grup.length
+  for (const to of liste) {
+    await transporter.sendMail({
+      from: `iyi event <${process.env.EMAIL_FROM}>`,
+      to,
+      subject: konu || 'iyi event',
+      html,
+    })
+    gonderilen++
   }
   return { gonderilen }
 }
