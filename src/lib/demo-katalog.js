@@ -10,3 +10,6 @@ export const KATEGORILER = [
   { key: 'cocuk', label: 'Çocuk', icon: 'fas fa-birthday-cake' },
   { key: 'dini', label: 'Dini & Geleneksel', icon: 'fas fa-mosque' },
 ]
+
+export const DEMO_HIZMETLER = []
+export const DEMO_EKSTRALAR = []
