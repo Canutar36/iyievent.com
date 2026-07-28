@@ -24,10 +24,16 @@ function epostaKabuk(icBaslik, govde) {
   <html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
   <body style="margin:0;padding:0;background:${MARKA.cream};font-family:Georgia,'Times New Roman',serif;">
     <div style="max-width:620px;margin:0 auto;background:#FFFFFF;">
-      <div style="background:${MARKA.slate};padding:2.6rem 2.5rem;text-align:center;">
-        <img src="${APP_URL}/assets/email/logo.png" alt="iyi event" width="160" style="display:block;margin:0 auto 1rem;width:160px;max-width:60%;height:auto;" />
-        <h1 style="font-family:Georgia,serif;font-weight:300;font-size:1.9rem;color:${MARKA.cream};margin:0;line-height:1.3;">${icBaslik}</h1>
-      </div>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFFFFF;">
+        <tr><td align="center" style="padding:34px 32px 10px;">
+          <img src="${APP_URL}/assets/email/logo.png" alt="iyi event" width="190" style="display:block;border:0;width:190px;max-width:58%;height:auto;" />
+        </td></tr>
+        <tr><td style="padding:0 28px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="background:${MARKA.slate};padding:36px 30px;text-align:center;">
+            <h1 style="font-family:Georgia,serif;font-weight:300;font-size:1.8rem;color:${MARKA.cream};margin:0;line-height:1.3;">${icBaslik}</h1>
+          </td></tr></table>
+        </td></tr>
+      </table>
       <div style="padding:2.8rem 2.5rem;">${govde}</div>
       <div style="background:${MARKA.slateDeep};padding:1.8rem 2.5rem;text-align:center;">
         <p style="color:rgba(246,243,234,0.5);font-family:Arial,sans-serif;font-size:0.75rem;margin:0;line-height:1.7;">
