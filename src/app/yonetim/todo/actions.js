@@ -24,8 +24,9 @@ export async function gorevEkle(etkinlikId, baslik, grup = 'Genel') {
   if (!baslik?.trim()) return { ok: false, error: 'Başlık boş olamaz.' }
   if (isDevPreview()) return { ok: true, demo: true, id: 'demo-' + Date.now() }
   const supabase = createServiceClient()
+  const { count } = await supabase.from('gorevler').select('*', { count: 'exact', head: true }).eq('etkinlik_id', etkinlikId)
   const { data, error } = await supabase.from('gorevler')
-    .insert({ etkinlik_id: etkinlikId, baslik, grup, kaynak: 'manuel' }).select('*').single()
+    .insert({ etkinlik_id: etkinlikId, baslik, grup, kaynak: 'manuel', siralama: count || 0 }).select('*').single()
   if (error) return { ok: false, error: error.message }
   revalidatePath('/yonetim/todo')
   return { ok: true, gorev: data }

@@ -5,17 +5,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 
-// Dev/demo veriler — gerçek backend bağlanınca sunucudan gelecek
-const DEMO_TODO = [
-  { id: 't1', baslik: 'Çırağan Gala — sahne kurulumu teyidi', etkinlik: 'Bosphorus Ethereal Gala', son: 'Bugün' },
-  { id: 't2', baslik: 'Olive Grove — catering menü onayı', etkinlik: 'Olive Grove Wedding', son: 'Bugün' },
-  { id: 't3', baslik: 'Dondurma arabası tedariki', etkinlik: 'Midnight Aegean Soiree', son: 'Yarın' },
-]
-const DEMO_RANDEVU = [
-  { id: 'r1', baslik: 'Melis Sabancı — yüz yüze görüşme', saat: '14:00', yer: 'Nişantaşı Ofis' },
-  { id: 'r2', baslik: 'Arda Holding — teklif sunumu', saat: '16:30', yer: 'Online' },
-]
-
 function Popover({ acik, onKapat, children, genislik = 320 }) {
   if (!acik) return null
   return (
@@ -69,6 +58,8 @@ export default function YonetimTopbar({ profile }) {
   const router = useRouter()
   const [arama, setArama] = useState('')
   const [bildirimler, setBildirimler] = useState([])
+  const [randevular, setRandevular] = useState([])
+  const [gorevler, setGorevler] = useState([])
   const supabase = createClient()
 
   const rolEtiket = {
@@ -85,22 +76,26 @@ export default function YonetimTopbar({ profile }) {
   }
 
   useEffect(() => {
-    bildirimleriYukle()
-    const interval = setInterval(bildirimleriYukle, 30000)
+    verileriYukle()
+    const interval = setInterval(verileriYukle, 30000)
     return () => clearInterval(interval)
   }, [])
 
-  async function bildirimleriYukle() {
+  async function verileriYukle() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    const { data } = await supabase
-      .from('bildirimler')
-      .select('*')
-      .eq('kullanici_id', user.id)
-      .eq('okundu', false)
-      .order('created_at', { ascending: false })
-      .limit(20)
-    setBildirimler(data || [])
+
+    const today = new Date().toISOString().split('T')[0]
+
+    const [bildirimRes, randevuRes, gorevRes] = await Promise.all([
+      supabase.from('bildirimler').select('*').eq('kullanici_id', user.id).eq('okundu', false).order('created_at', { ascending: false }).limit(20),
+      supabase.from('randevular').select('*').gte('tarih', today).order('tarih').order('baslangic_saat').limit(10),
+      supabase.from('gorevler').select('*').in('durum', ['bekliyor', 'yapiliyor']).order('siralama').limit(10),
+    ])
+
+    setBildirimler(bildirimRes.data || [])
+    setRandevular(randevuRes.data || [])
+    setGorevler(gorevRes.data || [])
   }
 
   async function bildirimleriOkunduIsaretle() {
@@ -147,18 +142,28 @@ export default function YonetimTopbar({ profile }) {
 
       {/* To-Do */}
       <div style={{ position: 'relative' }}>
-        <IkonButon ikon="fas fa-list-check" baslik="Yapılacaklar" aktif={acik === 'todo'} rozet={DEMO_TODO.length} onClick={() => toggle('todo')} />
+        <IkonButon ikon="fas fa-list-check" baslik="Yapılacaklar" aktif={acik === 'todo'} rozet={gorevler.length} onClick={() => toggle('todo')} />
         <Popover acik={acik === 'todo'} onKapat={() => setAcik(null)}>
-          <PopBaslik link="/yonetim/todo" linkLabel="Tümü">Bugünün Görevleri</PopBaslik>
+          <PopBaslik link="/yonetim/todo" linkLabel="Tümü">Görevler</PopBaslik>
           <div style={{ maxHeight: '340px', overflowY: 'auto' }}>
-            {DEMO_TODO.map(t => (
-              <div key={t.id} style={{ padding: '0.8rem 1.1rem', borderBottom: '1px solid var(--color-cream)', display: 'flex', gap: '0.7rem', alignItems: 'flex-start' }}>
-                <i className="far fa-square" style={{ color: 'var(--color-orange)', marginTop: '0.2rem', fontSize: '0.9rem' }} />
-                <div>
-                  <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.84rem', color: 'var(--color-slate)', fontWeight: 500 }}>{t.baslik}</div>
-                  <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.72rem', color: 'var(--color-slate-medium)' }}>{t.etkinlik} · {t.son}</div>
-                </div>
+            {gorevler.length === 0 && (
+              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-slate-medium)', fontSize: '0.82rem' }}>
+                Aktif görev yok
               </div>
+            )}
+            {gorevler.map(g => (
+              <Link key={g.id} href="/yonetim/todo" onClick={() => setAcik(null)} style={{ textDecoration: 'none' }}>
+                <div style={{ padding: '0.8rem 1.1rem', borderBottom: '1px solid var(--color-cream)', display: 'flex', gap: '0.7rem', alignItems: 'flex-start', cursor: 'pointer' }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#FAFAF9'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <i className={g.durum === 'tamam' ? 'fas fa-check-circle' : g.durum === 'yapiliyor' ? 'fas fa-spinner' : 'far fa-square'}
+                    style={{ color: g.durum === 'tamam' ? '#10b981' : g.durum === 'yapiliyor' ? '#3b82f6' : 'var(--color-orange)', marginTop: '0.15rem', fontSize: '0.85rem' }} />
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.84rem', color: 'var(--color-slate)', fontWeight: 500 }}>{g.baslik}</div>
+                    {g.son_tarih && <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.72rem', color: 'var(--color-slate-medium)' }}>Son: {new Date(g.son_tarih).toLocaleDateString('tr-TR')}</div>}
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         </Popover>
@@ -166,18 +171,31 @@ export default function YonetimTopbar({ profile }) {
 
       {/* Takvim */}
       <div style={{ position: 'relative' }}>
-        <IkonButon ikon="fas fa-calendar-day" baslik="Takvim / Randevular" aktif={acik === 'takvim'} rozet={DEMO_RANDEVU.length} onClick={() => toggle('takvim')} />
+        <IkonButon ikon="fas fa-calendar-day" baslik="Takvim / Randevular" aktif={acik === 'takvim'} rozet={randevular.length} onClick={() => toggle('takvim')} />
         <Popover acik={acik === 'takvim'} onKapat={() => setAcik(null)}>
           <PopBaslik link="/yonetim/takvim" linkLabel="Takvim">Bugünün Randevuları</PopBaslik>
           <div style={{ maxHeight: '340px', overflowY: 'auto' }}>
-            {DEMO_RANDEVU.map(r => (
-              <div key={r.id} style={{ padding: '0.8rem 1.1rem', borderBottom: '1px solid var(--color-cream)', display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-orange)', flexShrink: 0 }}>{r.saat}</div>
-                <div>
-                  <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.84rem', color: 'var(--color-slate)', fontWeight: 500 }}>{r.baslik}</div>
-                  <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.72rem', color: 'var(--color-slate-medium)' }}>{r.yer}</div>
-                </div>
+            {randevular.length === 0 && (
+              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-slate-medium)', fontSize: '0.82rem' }}>
+                Bugün randevu yok
               </div>
+            )}
+            {randevular.map(r => (
+              <Link key={r.id} href="/yonetim/takvim" onClick={() => setAcik(null)} style={{ textDecoration: 'none' }}>
+                <div style={{ padding: '0.8rem 1.1rem', borderBottom: '1px solid var(--color-cream)', display: 'flex', gap: '0.8rem', alignItems: 'center', cursor: 'pointer' }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#FAFAF9'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-orange)', flexShrink: 0 }}>
+                    {r.baslangic_saat ? r.baslangic_saat.slice(0, 5) : '--:--'}
+                  </div>
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.84rem', color: 'var(--color-slate)', fontWeight: 500 }}>{r.baslik}</div>
+                    <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.72rem', color: 'var(--color-slate-medium)' }}>
+                      {r.konum || r.musteri_ad || '—'}
+                    </div>
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         </Popover>
