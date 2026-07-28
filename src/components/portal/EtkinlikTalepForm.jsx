@@ -78,14 +78,25 @@ export default function EtkinlikTalepForm({ isOpen, onClose }) {
     return acc
   }, {})
 
+  const isOzelTalep = form.kategori === '__ozel__' && form.ozel_talep.trim() !== ''
+
   const canNext = () => {
     switch (step) {
       case 1: return form.kategori !== ''
-      case 2: return form.hizmet_id !== '' || form.ozel_talep !== ''
+      case 2: return form.hizmet_id !== '' || isOzelTalep
       case 3: return form.il !== ''
       case 4: return true
       case 5: return true
       default: return true
+    }
+  }
+
+  function handleNext() {
+    if (!canNext()) return
+    if (step === 1 && isOzelTalep) {
+      setStep(3)
+    } else {
+      setStep(step + 1)
     }
   }
 
@@ -446,7 +457,7 @@ export default function EtkinlikTalepForm({ isOpen, onClose }) {
           ) : <div />}
 
           {step < 5 ? (
-            <button type="button" onClick={() => canNext() && setStep(step + 1)}
+            <button type="button" onClick={handleNext}
               disabled={!canNext()} style={{
                 padding: '0.6rem 1.5rem', borderRadius: '8px',
                 background: canNext() ? 'var(--color-orange)' : 'rgba(0,0,0,0.1)',
