@@ -1,6 +1,7 @@
 import { createServiceClient } from '@/lib/supabase-server'
 import { isDevPreview } from '@/lib/config'
 import Link from 'next/link'
+import YeniMusteriButonu from './YeniMusteriButonu'
 
 export const metadata = { title: 'Müşteriler | Yönetim' }
 
@@ -35,9 +36,12 @@ export default async function MusterilerPage() {
 
   return (
     <div style={{ padding: '2.5rem' }}>
-      <div style={{ marginBottom: '1.8rem' }}>
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--color-orange)', marginBottom: '0.3rem' }}>CRM</p>
-        <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '2.2rem', fontWeight: 400, color: 'var(--color-slate)', margin: 0 }}>Müşteriler</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.8rem' }}>
+        <div>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--color-orange)', marginBottom: '0.3rem' }}>CRM</p>
+          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '2.2rem', fontWeight: 400, color: 'var(--color-slate)', margin: 0 }}>Müşteriler</h1>
+        </div>
+        <YeniMusteriButonu />
       </div>
 
       <div style={{ background: '#fff', border: '1px solid var(--color-cream-dark)', overflowX: 'auto' }}>
