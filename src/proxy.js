@@ -9,7 +9,7 @@ import { isPersonel, isSuperAdmin, yetki, yoldanModul } from '@/lib/roles'
  * İki görevi var:
  *  1) Alt alan adı yönlendirmesi — tek kod tabanı, 3 kitle:
  *       iyievent.com          → tanıtım sitesi (kök /)
- *       portal.iyievent.com   → müşteri portalı (/musteri)
+ *       hesap.iyievent.com    → müşteri portalı (/musteri)
  *       yonetim.iyievent.com  → yönetim paneli (/yonetim)
  *  2) Auth koruması — portal ve yönetim alanlarına yetkisiz erişimi engeller.
  *
@@ -17,16 +17,16 @@ import { isPersonel, isSuperAdmin, yetki, yoldanModul } from '@/lib/roles'
  *   localhost:3000/            → tanıtım
  *   localhost:3000/musteri     → portal
  *   localhost:3000/yonetim     → yönetim
- * İstenirse *.localhost da desteklenir: portal.localhost:3000, yonetim.localhost:3000
+ * İstenirse *.localhost da desteklenir: hesap.localhost:3000, yonetim.localhost:3000
  */
 
 // Alt alan adı → uygulama içi kök path eşlemesi
 const SUBDOMAIN_BASE = {
-  portal: '/musteri',
+  hesap: '/musteri',
   yonetim: '/yonetim',
 }
 
-/** Host header'ından alt alan adını çıkarır ('portal' | 'yonetim' | null). */
+/** Host header'ından alt alan adını çıkarır ('hesap' | 'yonetim' | null). */
 function getSubdomain(host) {
   if (!host) return null
   const hostname = host.split(':')[0].toLowerCase()
@@ -35,7 +35,7 @@ function getSubdomain(host) {
   if (hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) return null
 
   const parts = hostname.split('.')
-  // portal.localhost → ['portal','localhost']
+  // hesap.localhost → ['hesap','localhost']
   // yonetim.iyievent.com → ['yonetim','iyievent','com']
   const sub = parts[0]
   if (sub === 'www') return null
@@ -97,6 +97,12 @@ export async function proxy(request) {
       dest.pathname = subdomain === 'portal' ? '/musteri/etkinlikler' : base
       return NextResponse.redirect(dest)
     }
+  } else {
+    // Ana domain (iyievent.com) → yonetim rotalarına erişimi engelle
+    if (path.startsWith('/yonetim')) {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
+    // musteri rotalarına izin ver (iyievent.com/musteri)
   }
 
   // ---------------------------------------------------------------
@@ -136,6 +142,11 @@ export async function proxy(request) {
     // Personel değilse yönetime giremez
     if (!profile || !isPersonel(profile.role)) {
       const dest = request.nextUrl.clone()
+      if (subdomain === 'yonetim') {
+        const hostname = host.split(':')[0]
+        const baseDomain = hostname.split('.').slice(-2).join('.')
+        return NextResponse.redirect(`${request.nextUrl.protocol}//hesap.${baseDomain}/musteri/etkinlikler`)
+      }
       dest.pathname = '/musteri/etkinlikler'
       return NextResponse.redirect(dest)
     }
@@ -158,8 +169,25 @@ export async function proxy(request) {
       .eq('id', user.id)
       .single()
 
+    const isPersonelRole = isPersonel(profile?.role)
     const dest = request.nextUrl.clone()
-    dest.pathname = isPersonel(profile?.role) ? '/yonetim' : '/musteri/etkinlikler'
+
+    if (subdomain === 'hesap' || subdomain === null) {
+      dest.pathname = isPersonelRole ? '/yonetim' : '/musteri/etkinlikler'
+      if (subdomain === 'hesap' && isPersonelRole) {
+        const hostname = host.split(':')[0]
+        const baseDomain = hostname.split('.').slice(-2).join('.')
+        return NextResponse.redirect(`${request.nextUrl.protocol}//yonetim.${baseDomain}/yonetim`)
+      }
+    } else if (subdomain === 'yonetim') {
+      if (!isPersonelRole) {
+        const hostname = host.split(':')[0]
+        const baseDomain = hostname.split('.').slice(-2).join('.')
+        return NextResponse.redirect(`${request.nextUrl.protocol}//hesap.${baseDomain}/musteri/etkinlikler`)
+      }
+      dest.pathname = '/yonetim'
+    }
+
     return NextResponse.redirect(dest)
   }
 

@@ -25,9 +25,9 @@ export default function MusteriSidebar({ profile }) {
     }}>
       {/* Logo */}
       <div style={{ padding: '0 1.5rem 2rem', borderBottom: '1px solid rgba(246,243,234,0.06)' }}>
-        <Link href="/">
+        <a href="https://iyievent.com">
           <Logo height={32} />
-        </Link>
+        </a>
       </div>
 
       {/* Profile */}
@@ -81,7 +81,7 @@ export default function MusteriSidebar({ profile }) {
 
       {/* Bottom actions */}
       <div style={{ padding: '1.5rem', borderTop: '1px solid rgba(246,243,234,0.06)' }}>
-        <Link href="/" style={{
+        <a href="https://iyievent.com" style={{
           display: 'flex', alignItems: 'center', gap: '0.8rem',
           padding: '0.6rem 0', marginBottom: '0.5rem',
           fontFamily: 'var(--font-display)', fontSize: '0.72rem', fontWeight: 600,
@@ -94,7 +94,7 @@ export default function MusteriSidebar({ profile }) {
         >
           <i className="fas fa-home" style={{ width: '16px', textAlign: 'center', fontSize: '0.8rem' }} />
           Ana Sayfa
-        </Link>
+        </a>
         <button onClick={signOut} style={{
           display: 'flex', alignItems: 'center', gap: '0.8rem',
           padding: '0.6rem 0', width: '100%',

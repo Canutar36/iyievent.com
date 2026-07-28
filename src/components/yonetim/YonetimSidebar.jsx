@@ -168,14 +168,22 @@ export default function YonetimSidebar({ profile }) {
 
       {/* Alt aksiyonlar */}
       <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid rgba(246,243,234,0.06)' }}>
-        <Link href="/" style={{
+        <a href="https://hesap.iyievent.com" style={{
+          display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.5rem 0', marginBottom: '0.3rem',
+          fontFamily: 'var(--font-display)', fontSize: '0.7rem', fontWeight: 600,
+          letterSpacing: '0.06em', color: 'rgba(246,243,234,0.35)', textDecoration: 'none',
+        }}>
+          <i className="fas fa-user" style={{ width: '16px', textAlign: 'center', fontSize: '0.78rem' }} />
+          Müşteri Paneli
+        </a>
+        <a href="/" style={{
           display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.5rem 0', marginBottom: '0.3rem',
           fontFamily: 'var(--font-display)', fontSize: '0.7rem', fontWeight: 600,
           letterSpacing: '0.06em', color: 'rgba(246,243,234,0.35)', textDecoration: 'none',
         }}>
           <i className="fas fa-globe" style={{ width: '16px', textAlign: 'center', fontSize: '0.78rem' }} />
           Tanıtım Sitesi
-        </Link>
+        </a>
         <button onClick={signOut} style={{
           display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.5rem 0', width: '100%',
           background: 'none', border: 'none', cursor: 'pointer',

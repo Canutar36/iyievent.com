@@ -78,7 +78,7 @@ yapınca commit + push edeceğim, Vercel saniyeler içinde yeni sürümü yayın
 
 ## Özel alan adı (sonra)
 Hazır olunca Vercel → **Settings → Domains**'den `iyievent.com` + alt alan adlarını
-(`portal.`, `yonetim.`) bağlarız; proxy.js zaten alt alan adı yönlendirmesine hazır.
+(`hesap.`, `yonetim.`) bağlarız; proxy.js zaten alt alan adı yönlendirmesine hazır.
 
 ## Güvenlik
 - `.env.local` ve `.env*` repoda değil (`.gitignore`). Gizli anahtarlar sadece

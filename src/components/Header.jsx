@@ -80,6 +80,20 @@ const Header = ({ t, lang, setLang }) => {
           >
             {t.nav.langSelect}
           </button>
+          {/* Müşteri Girişi */}
+          <a href="https://hesap.iyievent.com" className="desktop-nav" style={{
+            fontFamily: 'var(--font-display)', fontSize: '0.75rem', fontWeight: 600,
+            letterSpacing: '0.1em', textTransform: 'uppercase',
+            color: 'var(--color-slate)', background: 'none',
+            border: '1px solid rgba(42,53,56,0.3)',
+            padding: '0.4rem 0.8rem', cursor: 'pointer',
+            textDecoration: 'none', transition: 'all 0.25s ease',
+          }}
+            onMouseEnter={e => { e.target.style.color = 'var(--color-orange)'; e.target.style.borderColor = 'var(--color-orange)'; }}
+            onMouseLeave={e => { e.target.style.color = 'var(--color-slate)'; e.target.style.borderColor = 'rgba(42,53,56,0.3)'; }}
+          >
+            Müşteri Girişi
+          </a>
           {/* CTA Button */}
           <button onClick={() => scrollTo('contact')} className="btn-primary desktop-nav" style={{ padding: '0.7rem 1.6rem', fontSize: '0.78rem' }}>
             {t.nav.cta}
@@ -119,6 +133,15 @@ const Header = ({ t, lang, setLang }) => {
               {link.label}
             </button>
           ))}
+          <a href="https://hesap.iyievent.com" style={{
+            display: 'block', fontFamily: 'var(--font-display)', fontSize: '1.1rem',
+            fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase',
+            color: 'var(--color-orange)', textAlign: 'left', padding: '0.5rem 0',
+            borderBottom: '1px solid rgba(42,53,56,0.08)',
+            textDecoration: 'none',
+          }}>
+            Müşteri Girişi
+          </a>
           <button onClick={() => scrollTo('contact')} className="btn-primary" style={{ marginTop: '0.5rem', textAlign: 'center', justifyContent: 'center' }}>
             {t.nav.cta}
           </button>

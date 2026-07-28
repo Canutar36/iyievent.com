@@ -1,22 +1,31 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect } from 'react'
 import { createClient } from '@/lib/supabase-client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Logo } from '@/components/Logo'
 
 function LoginForm() {
-  const [mod, setMod] = useState('giris') // 'giris' | 'sifre_sifirla'
+  const [mod, setMod] = useState('giris')
   const [email, setEmail] = useState('')
   const [sifre, setSifre] = useState('')
   const [loading, setLoading] = useState(false)
   const [hata, setHata] = useState('')
   const [basari, setBasari] = useState('')
+  const [portalTipi, setPortalTipi] = useState(null)
 
   const supabase = createClient()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get('redirect') || '/yonetim'
+
+  useEffect(() => {
+    const host = window.location.hostname
+    if (host.startsWith('yonetim.')) setPortalTipi('yonetim')
+    else if (host.startsWith('hesap.') || host.startsWith('musteri.') || host.startsWith('portal.')) setPortalTipi('musteri')
+    else setPortalTipi('yonetim')
+  }, [])
+
+  const redirect = searchParams.get('redirect') || (portalTipi === 'musteri' ? '/musteri/etkinlikler' : '/yonetim')
 
   const handleGiris = async (e) => {
     e.preventDefault()
@@ -29,8 +38,17 @@ function LoginForm() {
         ? 'E-posta veya şifre hatalı.'
         : error.message)
     } else {
-      router.push(redirect)
-      router.refresh()
+      const host = window.location.hostname
+      const baseDomain = host.split('.').slice(-2).join('.')
+      const targetSubdomain = portalTipi === 'musteri' ? 'musteri' : 'yonetim'
+      const targetUrl = `${window.location.protocol}//${targetSubdomain}.${baseDomain}${redirect}`
+
+      if (host !== `${targetSubdomain}.${baseDomain}`) {
+        window.location.href = targetUrl
+      } else {
+        router.push(redirect)
+        router.refresh()
+      }
     }
     setLoading(false)
   }
@@ -40,8 +58,13 @@ function LoginForm() {
     setLoading(true)
     setHata('')
 
+    const host = window.location.hostname
+    const baseDomain = host.split('.').slice(-2).join('.')
+    const currentSubdomain = host.split('.')[0]
+    const callbackBase = `${window.location.protocol}//${currentSubdomain}.${baseDomain}`
+
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/api/auth/callback?next=/yonetim`,
+      redirectTo: `${callbackBase}/api/auth/callback?next=${redirect}`,
     })
 
     if (error) {
@@ -65,30 +88,31 @@ function LoginForm() {
     boxSizing: 'border-box',
   }
 
+  const isYonetim = portalTipi === 'yonetim'
+
   return (
     <div style={{ width: '100%', maxWidth: '440px' }}>
-      {/* Logo */}
       <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
         <a href="/" style={{ display: 'inline-block' }}>
           <Logo height={44} />
         </a>
       </div>
 
-      {/* Card */}
       <div style={{
         background: '#fff',
         padding: '3rem',
         border: '1px solid var(--color-cream-dark)',
         boxShadow: '0 8px 40px rgba(42,53,56,0.06)',
       }}>
-        {/* Başlık */}
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
           <div style={{
             fontFamily: 'var(--font-display)', fontSize: '0.7rem', fontWeight: 700,
             letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--color-orange)',
             marginBottom: '0.5rem',
           }}>
-            {mod === 'giris' ? 'Yönetim Girişi' : 'Şifre Sıfırlama'}
+            {mod === 'giris'
+              ? (isYonetim ? 'Yönetim Girişi' : 'Müşteri Girişi')
+              : 'Şifre Sıfırlama'}
           </div>
           <h1 style={{
             fontFamily: 'var(--font-serif)', fontSize: '1.6rem', fontWeight: 400,
@@ -98,7 +122,6 @@ function LoginForm() {
           </h1>
         </div>
 
-        {/* Hata / Başarı mesajları */}
         {hata && (
           <div style={{
             background: '#FEF2F2', border: '1px solid #FECACA',
@@ -114,7 +137,6 @@ function LoginForm() {
           }}>{basari}</div>
         )}
 
-        {/* Giriş Formu */}
         {mod === 'giris' && (
           <form onSubmit={handleGiris} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <input
@@ -153,7 +175,6 @@ function LoginForm() {
           </form>
         )}
 
-        {/* Şifre Sıfırla */}
         {mod === 'sifre_sifirla' && (
           <form onSubmit={handleSifreSifirla} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <p style={{
@@ -190,7 +211,6 @@ function LoginForm() {
         )}
       </div>
 
-      {/* Back to site */}
       <div style={{ textAlign: 'center', marginTop: '2rem' }}>
         <a href="/" style={{
           fontFamily: 'var(--font-display)', fontSize: '0.75rem', fontWeight: 600,
