@@ -3,20 +3,10 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase-client'
 import { KATEGORILER } from '@/lib/demo-katalog'
+import { IL_ILCE } from '@/lib/il-ilce'
 import toast from 'react-hot-toast'
 
-const ILLER = [
-  'Adana', 'Adıyaman', 'Afyonkarahisar', 'Ağrı', 'Aksaray', 'Amasya', 'Ankara', 'Antalya',
-  'Ardahan', 'Artvin', 'Aydın', 'Balıkesir', 'Bartın', 'Batman', 'Bayburt', 'Bilecik',
-  'Bingöl', 'Bitlis', 'Bolu', 'Burdur', 'Bursa', 'Çanakkale', 'Çankırı', 'Çorum',
-  'Denizli', 'Diyarbakır', 'Düzce', 'Edirne', 'Elazığ', 'Erzincan', 'Erzurum', 'Eskişehir',
-  'Gaziantep', 'Giresun', 'Gümüşhane', 'Hakkari', 'Hatay', 'Iğdır', 'Isparta', 'İstanbul',
-  'İzmir', 'Kahramanmaraş', 'Karabük', 'Karaman', 'Kars', 'Kastamonu', 'Kayseri', 'Kırıkkale',
-  'Kırklareli', 'Kırşehir', 'Kilis', 'Kocaeli', 'Konya', 'Kütahya', 'Malatya', 'Manisa',
-  'Mardin', 'Mersin', 'Muğla', 'Muş', 'Nevşehir', 'Niğde', 'Ordu', 'Osmaniye',
-  'Rize', 'Sakarya', 'Samsun', 'Şanlıurfa', 'Siirt', 'Sinop', 'Sivas', 'Şırnak',
-  'Tekirdağ', 'Tokat', 'Trabzon', 'Tunceli', 'Uşak', 'Van', 'Yalova', 'Yozgat', 'Zonguldak',
-]
+const ILLER = Object.keys(IL_ILCE)
 
 export default function EtkinlikTalepForm({ isOpen, onClose }) {
   const [step, setStep] = useState(1)
@@ -350,20 +340,32 @@ export default function EtkinlikTalepForm({ isOpen, onClose }) {
                     </div>
                     <div>
                       <label style={labelStyle}>İlçe</label>
-                      <input type="text" value={form.ilce} onChange={e => setForm({ ...form, ilce: e.target.value })}
-                        placeholder="İlçe" style={inputStyle} />
+                      <select
+                        value={form.ilce}
+                        onChange={e => setForm({ ...form, ilce: e.target.value })}
+                        style={{ ...inputStyle, opacity: form.il ? 1 : 0.5 }}
+                        disabled={!form.il}
+                      >
+                        <option value="">{form.il ? 'İlçe seçin' : 'Önce il seçin'}</option>
+                        {form.il && IL_ILCE[form.il]?.map(ilce => (
+                          <option key={ilce} value={ilce}>{ilce}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
-                    <div>
-                      <label style={labelStyle}>Tahmini Tarih</label>
-                      <input type="date" value={form.tarih} onChange={e => setForm({ ...form, tarih: e.target.value })} style={inputStyle} />
-                    </div>
-                    <div>
-                      <label style={labelStyle}>Saat</label>
-                      <input type="time" value={form.saat} onChange={e => setForm({ ...form, saat: e.target.value })} style={inputStyle} />
-                    </div>
+
+                  {/* Özel Tarih Seçici */}
+                  <div>
+                    <label style={labelStyle}>Tahmini Tarih</label>
+                    <CustomDatePicker value={form.tarih} onChange={v => setForm({ ...form, tarih: v })} />
                   </div>
+
+                  {/* Özel Saat Seçici */}
+                  <div>
+                    <label style={labelStyle}>Saat</label>
+                    <CustomTimePicker value={form.saat} onChange={v => setForm({ ...form, saat: v })} />
+                  </div>
+
                   <div>
                     <label style={labelStyle}>Tahmini Misafir Sayısı</label>
                     <input type="number" value={form.tahmini_misafir} onChange={e => setForm({ ...form, tahmini_misafir: e.target.value })}
@@ -514,4 +516,193 @@ const inputStyle = {
   width: '100%', padding: '0.55rem 0.7rem', borderRadius: '8px',
   border: '1px solid rgba(0,0,0,0.1)', fontSize: '0.85rem',
   fontFamily: 'var(--font-sans)', boxSizing: 'border-box',
+}
+
+const AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
+const GUNLER = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz']
+
+function CustomDatePicker({ value, onChange }) {
+  const [open, setOpen] = useState(false)
+  const today = new Date()
+  const [viewDate, setViewDate] = useState(value ? new Date(value + 'T00:00:00') : new Date(today.getFullYear(), today.getMonth(), 1))
+
+  const year = viewDate.getFullYear()
+  const month = viewDate.getMonth()
+  const firstDay = new Date(year, month, 1).getDay()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const startDay = firstDay === 0 ? 6 : firstDay - 1
+
+  const days = []
+  for (let i = 0; i < startDay; i++) days.push(null)
+  for (let i = 1; i <= daysInMonth; i++) days.push(i)
+
+  const selectedDate = value ? new Date(value + 'T00:00:00') : null
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+
+  function selectDate(day) {
+    if (!day) return
+    const d = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    onChange(d)
+    setOpen(false)
+  }
+
+  const displayValue = value
+    ? `${selectedDate.getDate()} ${AYLAR[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`
+    : ''
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <button type="button" onClick={() => setOpen(!open)} style={{
+        ...inputStyle, textAlign: 'left', cursor: 'pointer', display: 'flex',
+        justifyContent: 'space-between', alignItems: 'center',
+        background: value ? '#fff' : '#F9FAFB',
+      }}>
+        <span style={{ color: value ? 'var(--color-slate-deep)' : 'rgba(0,0,0,0.35)' }}>
+          {displayValue || 'Tarih seçin'}
+        </span>
+        <i className="fas fa-calendar-alt" style={{ color: 'var(--color-orange)', fontSize: '0.85rem' }} />
+      </button>
+      {open && (
+        <div style={{
+          position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 1000,
+          background: 'white', borderRadius: '12px', boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+          padding: '1rem', width: '100%', minWidth: '280px',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
+            <button type="button" onClick={() => setViewDate(new Date(year, month - 1, 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.3rem 0.5rem', fontSize: '0.85rem', color: 'var(--color-slate)' }}>
+              <i className="fas fa-chevron-left" />
+            </button>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', fontWeight: 700, color: 'var(--color-slate-deep)' }}>
+              {AYLAR[month]} {year}
+            </span>
+            <button type="button" onClick={() => setViewDate(new Date(year, month + 1, 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.3rem 0.5rem', fontSize: '0.85rem', color: 'var(--color-slate)' }}>
+              <i className="fas fa-chevron-right" />
+            </button>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', textAlign: 'center', marginBottom: '0.4rem' }}>
+            {GUNLER.map(g => (
+              <div key={g} style={{ fontFamily: 'var(--font-display)', fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.05em', color: 'rgba(0,0,0,0.35)', padding: '0.3rem 0' }}>
+                {g}
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}>
+            {days.map((day, i) => {
+              if (!day) return <div key={`empty-${i}`} />
+              const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+              const isPast = dateStr < todayStr
+              const isSelected = value === dateStr
+              const isToday = dateStr === todayStr
+              return (
+                <button key={i} type="button" onClick={() => !isPast && selectDate(day)}
+                  style={{
+                    padding: '0.45rem', borderRadius: '8px', border: 'none', cursor: isPast ? 'not-allowed' : 'pointer',
+                    background: isSelected ? 'var(--color-orange)' : isToday ? 'rgba(240,90,40,0.08)' : 'transparent',
+                    color: isSelected ? 'white' : isPast ? 'rgba(0,0,0,0.2)' : 'var(--color-slate-deep)',
+                    fontFamily: 'var(--font-sans)', fontSize: '0.75rem', fontWeight: isSelected || isToday ? 600 : 400,
+                    transition: 'all 0.15s',
+                  }}>
+                  {day}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function CustomTimePicker({ value, onChange }) {
+  const [open, setOpen] = useState(false)
+  const [hour, setHour] = useState(value ? value.split(':')[0] : '')
+  const [minute, setMinute] = useState(value ? value.split(':')[1] : '')
+
+  const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
+  const minutes = ['00', '15', '30', '45']
+
+  useEffect(() => {
+    if (value) {
+      const [h, m] = value.split(':')
+      setHour(h)
+      setMinute(m)
+    }
+  }, [value])
+
+  function selectTime(h, m) {
+    setHour(h)
+    setMinute(m)
+    onChange(`${h}:${m}`)
+    setOpen(false)
+  }
+
+  const displayValue = value ? `${hour}:${minute}` : ''
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <button type="button" onClick={() => setOpen(!open)} style={{
+        ...inputStyle, textAlign: 'left', cursor: 'pointer', display: 'flex',
+        justifyContent: 'space-between', alignItems: 'center',
+        background: value ? '#fff' : '#F9FAFB',
+      }}>
+        <span style={{ color: value ? 'var(--color-slate-deep)' : 'rgba(0,0,0,0.35)' }}>
+          {displayValue || 'Saat seçin'}
+        </span>
+        <i className="fas fa-clock" style={{ color: 'var(--color-orange)', fontSize: '0.85rem' }} />
+      </button>
+      {open && (
+        <div style={{
+          position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 1000,
+          background: 'white', borderRadius: '12px', boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+          padding: '1rem', width: '100%', minWidth: '240px',
+        }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(0,0,0,0.35)', marginBottom: '0.6rem' }}>
+            Saat Seçin
+          </div>
+          <div style={{ display: 'flex', gap: '0.6rem' }}>
+            {/* Saat */}
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.05em', color: 'rgba(0,0,0,0.35)', marginBottom: '0.3rem', textAlign: 'center' }}>
+                SAAT
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '3px', maxHeight: '180px', overflowY: 'auto' }}>
+                {hours.map(h => (
+                  <button key={h} type="button" onClick={() => { setHour(h); if (minute) selectTime(h, minute) }}
+                    style={{
+                      padding: '0.35rem', borderRadius: '6px', border: 'none', cursor: 'pointer',
+                      background: hour === h ? 'var(--color-orange)' : '#F9FAFB',
+                      color: hour === h ? 'white' : 'var(--color-slate-deep)',
+                      fontFamily: 'var(--font-sans)', fontSize: '0.7rem', fontWeight: hour === h ? 600 : 400,
+                      transition: 'all 0.15s',
+                    }}>
+                    {h}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* Dakika */}
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.05em', color: 'rgba(0,0,0,0.35)', marginBottom: '0.3rem', textAlign: 'center' }}>
+                DAKİKA
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '3px' }}>
+                {minutes.map(m => (
+                  <button key={m} type="button" onClick={() => { setMinute(m); if (hour) selectTime(hour, m) }}
+                    style={{
+                      padding: '0.35rem', borderRadius: '6px', border: 'none', cursor: 'pointer',
+                      background: minute === m ? 'var(--color-orange)' : '#F9FAFB',
+                      color: minute === m ? 'white' : 'var(--color-slate-deep)',
+                      fontFamily: 'var(--font-sans)', fontSize: '0.7rem', fontWeight: minute === m ? 600 : 400,
+                      transition: 'all 0.15s',
+                    }}>
+                    :{m}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
