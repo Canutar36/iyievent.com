@@ -136,7 +136,6 @@ export default function EtkinlikTalepForm({ isOpen, onClose }) {
         tahmini_misafir_sayisi: form.tahmini_misafir ? Number(form.tahmini_misafir) : null,
         durum: 'talep',
         notlar: notlarParts.join('\n') || null,
-        hizmet_id: form.hizmet_id || null,
       })
 
     if (error) {
@@ -319,11 +318,11 @@ export default function EtkinlikTalepForm({ isOpen, onClose }) {
                           <span style={{ fontFamily: 'var(--font-sans)', fontSize: '0.9rem', fontWeight: 500, color: 'var(--color-slate-deep)' }}>
                             {hizmet.ad}
                           </span>
-                          <span style={{ fontFamily: 'var(--font-sans)', fontSize: '0.8rem', color: 'var(--color-orange)', fontWeight: 600 }}>
+                          <span style={{ fontFamily: 'var(--font-sans)', fontSize: '0.8rem', color: 'var(--color-orange)', fontWeight: 600, whiteSpace: 'nowrap' }}>
                             {hizmet.fiyatlandirma_tipi === 'sabit'
-                              ? `${Number(hizmet.birim_fiyat).toLocaleString('tr-TR')} ₺`
+                              ? `${Number(hizmet.birim_fiyat).toLocaleString('tr-TR')}'den başlayan`
                               : hizmet.fiyatlandirma_tipi === 'kisi_basi'
-                                ? `Kişi başı ${Number(hizmet.birim_fiyat).toLocaleString('tr-TR')} ₺`
+                                ? `Kişi başı ${Number(hizmet.birim_fiyat).toLocaleString('tr-TR')}'den başlayan`
                                 : 'Kademeli fiyat'}
                           </span>
                         </div>
