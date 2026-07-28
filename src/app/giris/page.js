@@ -193,13 +193,13 @@ function LoginForm() {
                   <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', cursor: 'pointer' }}>
                     <input type="checkbox" checked={kvkk} onChange={e => setKvkk(e.target.checked)} style={checkboxStyle} />
                     <span style={labelStyle}>
-                      <a href="#" style={linkStyle}>Kişisel Verilerin Korunması Kanunu</a>'nu okudum ve kabul ediyorum.
+                      <a href="/kvkk" target="_blank" style={linkStyle}>Kişisel Verilerin Korunması Kanunu</a>'nu okudum ve kabul ediyorum.
                     </span>
                   </label>
                   <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', cursor: 'pointer' }}>
                     <input type="checkbox" checked={gizlilik} onChange={e => setGizlilik(e.target.checked)} style={checkboxStyle} />
                     <span style={labelStyle}>
-                      <a href="#" style={linkStyle}>Gizlilik Politikası</a>nı okudum ve onaylıyorum.
+                      <a href="/gizlilik-politikasi" target="_blank" style={linkStyle}>Gizlilik Politikası</a>nı okudum ve onaylıyorum.
                     </span>
                   </label>
                 </div>
