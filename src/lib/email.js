@@ -1,18 +1,6 @@
 import nodemailer from 'nodemailer'
-import { readFileSync } from 'fs'
-import { join } from 'path'
 
-let logoBase64 = null
-function getLogoDataUri() {
-  if (logoBase64) return logoBase64
-  try {
-    const buf = readFileSync(join(process.cwd(), 'public', 'assets', 'email', 'logo.png'))
-    logoBase64 = `data:image/png;base64,${buf.toString('base64')}`
-  } catch {
-    logoBase64 = `${APP_URL}/assets/email/logo.png`
-  }
-  return logoBase64
-}
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://iyievent-com.vercel.app'
 
 function getTransporter() {
   return nodemailer.createTransport({
@@ -33,14 +21,13 @@ const MARKA = {
 
 function epostaKabuk(icBaslik, govde) {
   const S = MARKA.slate, D = MARKA.slateDeep, O = MARKA.orange, C = MARKA.cream
-  const logo = getLogoDataUri()
   return `<!DOCTYPE html>
 <html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="x-apple-disable-message-reformatting"><title>iyi event</title></head>
 <body style="margin:0;padding:0;background:${C};-webkit-text-size-adjust:100%;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C};"><tr><td align="center" style="padding:24px 12px;">
     <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:100%;background:#ffffff;">
       <tr><td align="center" style="padding:34px 32px 10px;">
-        <img src="${logo}" alt="iyi event" width="190" style="display:block;border:0;width:190px;max-width:58%;height:auto;" />
+        <img src="${APP_URL}/assets/email/logo.png" alt="iyi event" width="190" style="display:block;border:0;width:190px;max-width:58%;height:auto;" />
       </td></tr>
       <tr><td style="padding:0 28px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="background:${S};padding:36px 30px;text-align:center;">
@@ -169,11 +156,8 @@ export async function sendOdemeHatirlatmaEmail({ email, etkinlikAd, tutar, link 
   })
 }
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://iyievent-com.vercel.app'
-
 export function tanitimEmailHtml(ad = '') {
   const S = MARKA.slate, D = MARKA.slateDeep, O = MARKA.orange, C = MARKA.cream
-  const logo = getLogoDataUri()
   const foto = (dosya, etiket) => `
     <td width="33.3%" valign="top" style="padding:0 5px;">
       <img src="${APP_URL}/assets/email/${dosya}" alt="${etiket}" width="100%" style="display:block;border:0;width:100%;height:auto;border-radius:3px;" />
@@ -192,7 +176,7 @@ export function tanitimEmailHtml(ad = '') {
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C};"><tr><td align="center" style="padding:24px 12px;">
     <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:100%;background:#ffffff;">
       <tr><td align="center" style="padding:34px 32px 6px;">
-        <img src="${logo}" alt="iyi event" width="190" style="display:block;border:0;width:190px;max-width:58%;height:auto;" />
+        <img src="${APP_URL}/assets/email/logo.png" alt="iyi event" width="190" style="display:block;border:0;width:190px;max-width:58%;height:auto;" />
       </td></tr>
       <tr><td style="padding:10px 28px 0;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="background:${S};padding:42px 30px;text-align:center;">
