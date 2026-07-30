@@ -11,6 +11,7 @@ const Hero = dynamic(() => import('@/components/Hero'), { ssr: false })
 const About = dynamic(() => import('@/components/About'), { ssr: false })
 const Services = dynamic(() => import('@/components/Services'), { ssr: false })
 const Portfolio = dynamic(() => import('@/components/Portfolio'), { ssr: false })
+const Metrics = dynamic(() => import('@/components/Metrics'), { ssr: false })
 const Testimonials = dynamic(() => import('@/components/Testimonials'), { ssr: false })
 const ContactForm = dynamic(() => import('@/components/ContactForm'), { ssr: false })
 const Footer = dynamic(() => import('@/components/Footer'), { ssr: false })
@@ -33,6 +34,7 @@ export default function LandingPage() {
           <About t={t} />
           <Services t={t} />
           <Portfolio t={t} />
+          <Metrics lang={lang} />
           <Testimonials t={t} lang={lang} />
           <ContactForm t={t} />
         </main>

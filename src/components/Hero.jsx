@@ -14,7 +14,7 @@ const Hero = ({ t, lang }) => {
   };
 
   return (
-    <section id="hero" style={{
+    <section id="hero" className="snap-section" style={{
       position: 'relative', height: '100vh', minHeight: '600px',
       overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
