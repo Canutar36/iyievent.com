@@ -75,8 +75,8 @@ const ContactForm = ({ t }) => {
   };
 
   return (
-    <section id="contact" ref={sectionRef} style={{
-      background: 'var(--color-slate-deep)', padding: '8rem 0',
+    <section id="contact" ref={sectionRef} className="snap-section" style={{
+      background: 'var(--color-slate-deep)',
     }}>
       <div className="container">
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '6rem', alignItems: 'start' }} className="contact-grid">

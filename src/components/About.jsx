@@ -24,7 +24,7 @@ const About = ({ t }) => {
   const [sectionRef, inView] = useInView(0.15);
 
   return (
-    <section id="about" ref={sectionRef} style={{ background: 'var(--color-cream)' }}>
+    <section id="about" ref={sectionRef} className="snap-section" style={{ background: 'var(--color-cream)' }}>
       <div className="container">
         {/* Section Label */}
         <div style={{

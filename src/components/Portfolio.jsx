@@ -40,7 +40,7 @@ const Portfolio = ({ t }) => {
   const filtered = filter === 'all' ? projects : projects.filter(p => p.category === filter);
 
   return (
-    <section id="portfolio" ref={sectionRef} style={{ background: 'var(--color-cream-light)', padding: '8rem 0' }}>
+    <section id="portfolio" ref={sectionRef} className="snap-section" style={{ background: 'var(--color-cream-light)' }}>
       <div className="container">
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>

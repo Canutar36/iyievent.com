@@ -26,10 +26,9 @@ export default function LandingPage() {
       <div style={{
         opacity: loaded ? 1 : 0,
         transition: 'opacity 0.6s ease',
-        minHeight: '100vh',
       }}>
         <Header t={t} lang={lang} setLang={setLang} />
-        <main>
+        <main className="snap-container">
           <Hero t={t} lang={lang} />
           <About t={t} />
           <Services t={t} />

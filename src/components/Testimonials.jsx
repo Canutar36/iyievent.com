@@ -80,7 +80,7 @@ const Testimonials = ({ t, lang }) => {
   };
 
   return (
-    <section id="testimonials" ref={sectionRef} style={{ background: 'var(--color-cream)', padding: '8rem 0' }}>
+    <section id="testimonials" ref={sectionRef} className="snap-section" style={{ background: 'var(--color-cream)' }}>
       <Metrics lang={lang} />
       <div className="container" style={{ marginTop: '8rem' }}>
         {/* Header */}

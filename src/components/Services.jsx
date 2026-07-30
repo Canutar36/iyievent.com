@@ -26,7 +26,7 @@ const Services = ({ t }) => {
   const [hovered, setHovered] = useState(null);
 
   return (
-    <section id="services" ref={sectionRef} style={{ background: 'var(--color-slate-dark)', padding: '8rem 0' }}>
+    <section id="services" ref={sectionRef} className="snap-section" style={{ background: 'var(--color-slate-dark)' }}>
       <div className="container">
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '5rem' }}>

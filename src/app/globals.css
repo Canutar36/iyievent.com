@@ -297,3 +297,66 @@ section {
     padding: 5rem 0;
   }
 }
+
+/* ========================================
+   FULL-PAGE SCROLL (Snap Scroll)
+   ======================================== */
+html {
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  height: 100%;
+}
+
+body {
+  height: 100%;
+}
+
+.snap-container {
+  scroll-snap-type: y mandatory;
+  height: 100vh;
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+}
+
+.snap-section {
+  min-height: 100vh;
+  height: 100vh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+/* Hero zaten 100vh, snap-section olarak davranacak */
+#hero {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+/* Footer hariç tüm sectionlar snap */
+.snap-section > * {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Scrollbar gizle (snap scroll'da gereksiz) */
+.snap-container::-webkit-scrollbar {
+  display: none;
+}
+
+.snap-container {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Touch cihazlarda daha yumuşak geçiş */
+@media (hover: none) and (pointer: coarse) {
+  .snap-container {
+    scroll-snap-type: y proximity;
+  }
+}
