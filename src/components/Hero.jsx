@@ -27,15 +27,8 @@ const Hero = ({ t, lang }) => {
           objectFit: 'cover', zIndex: 0,
         }}
       >
-        {/* Şimdilik placeholder — gerçek video eklenecek */}
         <source src="/assets/hero-video.mp4" type="video/mp4" />
       </video>
-
-      {/* Fallback: Video yoksa koyu arka plan */}
-      <div style={{
-        position: 'absolute', inset: 0, zIndex: 0,
-        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-      }} />
 
       {/* Dark Overlay — okunabilirlik için */}
       <div style={{

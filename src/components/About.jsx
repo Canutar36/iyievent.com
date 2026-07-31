@@ -22,14 +22,8 @@ const About = ({ t }) => {
       <div style={{
         position: 'absolute', inset: 0, zIndex: 0,
         backgroundImage: 'url(/assets/about-bg.webp)',
-        backgroundSize: 'center', backgroundPosition: 'center',
+        backgroundSize: 'cover', backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-      }} />
-
-      {/* Fallback: Koyu arka plan (görsel yoksa) */}
-      <div style={{
-        position: 'absolute', inset: 0, zIndex: 0,
-        background: 'linear-gradient(160deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%)',
       }} />
 
       {/* Karartma Overlay */}
