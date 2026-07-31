@@ -14,7 +14,6 @@ const Portfolio = dynamic(() => import('@/components/Portfolio'), { ssr: false }
 const Metrics = dynamic(() => import('@/components/Metrics'), { ssr: false })
 const Testimonials = dynamic(() => import('@/components/Testimonials'), { ssr: false })
 const ContactForm = dynamic(() => import('@/components/ContactForm'), { ssr: false })
-const Footer = dynamic(() => import('@/components/Footer'), { ssr: false })
 
 export default function LandingPage() {
   const [lang, setLang] = useState('tr')
@@ -36,9 +35,8 @@ export default function LandingPage() {
           <Portfolio t={t} />
           <Metrics lang={lang} />
           <Testimonials t={t} lang={lang} />
-          <ContactForm t={t} />
+          <ContactForm t={t} lang={lang} />
         </main>
-        <Footer t={t} lang={lang} />
       </div>
     </>
   )
