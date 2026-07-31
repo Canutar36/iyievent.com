@@ -55,6 +55,7 @@ const Services = ({ t }) => {
   return (
     <section id="services" className="snap-section" style={{
       position: 'relative', overflow: 'hidden', background: '#111',
+      flexDirection: 'row',
     }}>
       {/* Başlık — Üstte ortada */}
       <div style={{
@@ -75,7 +76,7 @@ const Services = ({ t }) => {
 
       {/* Split Container */}
       <div style={{
-        display: 'flex', height: '100%',
+        display: 'flex', flexDirection: 'row', height: '100%', width: '100%',
         transform: transitioning
           ? direction === 'next' ? 'translateX(-2%)' : 'translateX(2%)'
           : 'translateX(0)',
