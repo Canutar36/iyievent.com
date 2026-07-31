@@ -20,7 +20,8 @@ export const translations = {
     },
     about: {
       title: "Seçkin Müşteriler İçin Etkinlik Sanatı",
-      subtitle: "HAKKIMIZDA",
+      heroTitle: "Seçkin müşteriler için,\netkinlik sanatının\nen zarif hali.",
+      subtitle: "FELSEFEMİZ",
       desc1: "iyi event olarak, sadece etkinlik organize etmiyoruz; duyulara hitap eden, her detayı incelikle işlenmiş eşsiz deneyimler tasarlıyoruz. Kurucularımızın vizyonuyla, hayallerinizi en yüksek lüks standartlarında gerçeğe dönüştürüyoruz.",
       desc2: "Bespoke (kişiye özel) felsefemiz doğrultusunda, her bir projeyi bir sanat eseri olarak ele alıyor; estetiği, kusursuz lojistik yönetimle harmanlayarak sıradanlıktan uzak duruyoruz.",
       values: {
@@ -247,7 +248,8 @@ export const translations = {
     },
     about: {
       title: "Event Artistry for Discerning Clients",
-      subtitle: "ABOUT US",
+      heroTitle: "For discerning clients,\nthe finest form of\nevent artistry.",
+      subtitle: "OUR PHILOSOPHY",
       desc1: "At iyi event, we don't just organize events; we design unique sensory experiences, tailored to perfection. Driven by our founders' vision, we realize your dreams to the highest standards of luxury.",
       desc2: "Aligned with our bespoke philosophy, we treat each project as a unique work of art, blending exquisite design aesthetics with absolute operational management.",
       values: {
