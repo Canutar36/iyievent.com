@@ -328,6 +328,20 @@ body {
   flex-direction: column;
   justify-content: center;
   position: relative;
+  padding: 0;
+}
+
+/* Services section: tam ekran split, padding/space yok */
+#services {
+  justify-content: stretch;
+  align-items: stretch;
+  padding: 0;
+  flex-direction: row !important;
+}
+
+#services > * {
+  flex: none;
+  display: block;
 }
 
 /* Hero zaten 100vh, snap-section olarak davranacak */

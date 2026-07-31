@@ -55,7 +55,6 @@ const Services = ({ t }) => {
   return (
     <section id="services" className="snap-section" style={{
       position: 'relative', overflow: 'hidden', background: '#111',
-      flexDirection: 'row',
     }}>
       {/* Başlık — Üstte ortada */}
       <div style={{
