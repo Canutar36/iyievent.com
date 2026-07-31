@@ -21,7 +21,7 @@ const About = ({ t }) => {
       {/* Arka Plan Görseli */}
       <div style={{
         position: 'absolute', inset: 0, zIndex: 0,
-        backgroundImage: 'url(/assets/about-bg.jpg)',
+        backgroundImage: 'url(/assets/about-bg.webp)',
         backgroundSize: 'center', backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
       }} />

@@ -194,9 +194,9 @@ export function tanitimEmailHtml(ad = '') {
       </td></tr>
       <tr><td style="padding:24px 31px 6px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-          ${foto('gala.jpg', 'Kurumsal &amp; Gala')}
-          ${foto('wedding.jpg', 'Düğün &amp; Nişan')}
-          ${foto('soiree.jpg', 'Özel &amp; Tematik')}
+          ${foto('gala.webp', 'Kurumsal &amp; Gala')}
+          ${foto('wedding.webp', 'Düğün &amp; Nişan')}
+          ${foto('soiree.webp', 'Özel &amp; Tematik')}
         </tr></table>
       </td></tr>
       <tr><td style="padding:22px 36px 0;">

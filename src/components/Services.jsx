@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 const serviceImages = [
-  { key: 'wedding', bg: '/assets/wedding.jpg', icon: 'fas fa-ring' },
-  { key: 'gala',    bg: '/assets/gala.jpg',    icon: 'fas fa-trophy' },
-  { key: 'soiree',  bg: '/assets/soiree.jpg',  icon: 'fas fa-glass-cheers' },
-  { key: 'destination', bg: '/assets/wedding.jpg', icon: 'fas fa-map-marked-alt' },
+  { key: 'wedding', bg: '/assets/wedding.webp', icon: 'fas fa-ring' },
+  { key: 'gala',    bg: '/assets/gala.webp',    icon: 'fas fa-trophy' },
+  { key: 'soiree',  bg: '/assets/soiree.webp',  icon: 'fas fa-glass-cheers' },
+  { key: 'destination', bg: '/assets/wedding.webp', icon: 'fas fa-map-marked-alt' },
 ];
 
 const useInView = (threshold = 0.15) => {
