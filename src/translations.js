@@ -42,6 +42,7 @@ export const translations = {
     services: {
       subtitle: "HİZMETLERİMİZ",
       title: "Benzersiz Deneyim Yelpazesi",
+      splitTitle: "Gerçekleştirdiğimiz Etkinliklerden Kareler",
       cta: "Detayları Görüşelim",
       items: [
         {
@@ -270,6 +271,7 @@ export const translations = {
     services: {
       subtitle: "OUR SERVICES",
       title: "Exquisite Event Portfolio",
+      splitTitle: "Scenes from Our Events",
       cta: "Discuss Your Event",
       items: [
         {
