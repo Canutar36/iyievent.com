@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 const projectImages = {
-  1: '/assets/wedding.webp',
-  2: '/assets/gala.webp',
-  3: '/assets/soiree.webp',
-  4: '/assets/wedding.webp',
-  5: '/assets/gala.webp',
-  6: '/assets/soiree.webp',
+  1: '/assets/event-1a.webp',
+  2: '/assets/event-1b.webp',
+  3: '/assets/event-2a.webp',
+  4: '/assets/event-2b.webp',
+  5: '/assets/event-3a.webp',
+  6: '/assets/event-3b.webp',
 };
 
 const useInView = (threshold = 0.1) => {
